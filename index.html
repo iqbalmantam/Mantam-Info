@@ -436,19 +436,29 @@ async function fetchText(url){
   let host='';try{host=new URL(url).host}catch{}
   if(host&&!noCors.has(host)){
     try{
-      const r=await fetchTimeout(url,{},7000);
+      const r=await fetchTimeout(url,{},5000);
       if(r.ok){const t=await r.text();if(t&&t.length>40)return t}
     }catch{noCors.add(host)}
   }
-  for(const i of proxyOrder){
-    try{
-      const r=await fetchTimeout(PROXIES[i](url),{},11000);
-      if(!r.ok)continue;
-      const t=await r.text();
-      if(t&&t.length>40){proxyOrder=[i,...proxyOrder.filter(x=>x!==i)];return t}
-    }catch{}
-  }
-  throw new Error('fetch');
+  return viaProxies(url);
+}
+// perantara dicoba berurutan tiap 3 detik tapi saling berlomba; yang pertama berhasil menang
+function viaProxies(url){
+  return new Promise((res,rej)=>{
+    let left=proxyOrder.length,done=false;const timers=[];
+    proxyOrder.forEach((i,k)=>{
+      timers.push(setTimeout(async()=>{
+        if(done)return;
+        try{
+          const r=await fetchTimeout(PROXIES[i](url),{},9000);
+          if(!r.ok)throw 0;
+          const t=await r.text();
+          if(!(t&&t.length>40))throw 0;
+          if(!done){done=true;timers.forEach(clearTimeout);proxyOrder=[i,...proxyOrder.filter(x=>x!==i)];res(t)}
+        }catch{if(--left===0&&!done)rej(new Error('fetch'))}
+      },k*3000));
+    });
+  });
 }
 window.__fb=function(img){
   const n=img.getAttribute('data-n')||'',p=img.parentNode;
@@ -651,26 +661,45 @@ async function getFeed(f){
   return v;
 }
 const newsCache=new Map();
-async function getNews(regionId,catId,force){
+function readStale(key){
+  try{const o=JSON.parse(localStorage.getItem('mi:newsc')||'{}')[key];
+    return o&&o.items.length?o.items.map(x=>({...x,date:x.date?new Date(x.date):null})):null}catch{return null}
+}
+function saveStale(key,items){
+  try{
+    const all=JSON.parse(localStorage.getItem('mi:newsc')||'{}');
+    all[key]={t:Date.now(),items:items.slice(0,40)};
+    const ks=Object.keys(all).sort((a,b)=>all[b].t-all[a].t).slice(0,6);
+    const out={};ks.forEach(k=>out[k]=all[k]);
+    localStorage.setItem('mi:newsc',JSON.stringify(out));
+  }catch{}
+}
+async function getNews(regionId,catId,force,onPart){
   const key=regionId+'|'+catId;
   const c=newsCache.get(key);
   if(!force&&c&&Date.now()-c.t<300000)return c.v;
-  const res=await Promise.allSettled(feedsFor(regionId,catId).map(f=>{if(force)feedCache.delete(f.url);return getFeed(f)}));
-  const ok=res.filter(r=>r.status==='fulfilled');
-  const seen=new Set();let items=[];
-  ok.forEach(r=>r.value.forEach(x=>{
-    const k=x.title.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,60);
-    if(seen.has(k))return;seen.add(k);items.push(x);
+  const feeds=feedsFor(regionId,catId);
+  const lists=[];let failed=0;
+  const build=()=>{
+    const seen=new Set();let items=[];
+    lists.forEach(l=>l.forEach(x=>{
+      const k=x.title.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,60);
+      if(seen.has(k))return;seen.add(k);items.push(x);
+    }));
+    items.sort((a,b)=>(b.date?b.date.getTime():0)-(a.date?a.date.getTime():0));
+    return {items:items.slice(0,90),failed,total:feeds.length};
+  };
+  await Promise.allSettled(feeds.map(f=>{
+    if(force)feedCache.delete(f.url);
+    return getFeed(f).then(v=>{lists.push(v);if(onPart)onPart(build())},()=>{failed++});
   }));
-  items.sort((a,b)=>(b.date?b.date.getTime():0)-(a.date?a.date.getTime():0));
-  items=items.slice(0,90);
-  const v={items,failed:res.length-ok.length,total:res.length};
-  if(items.length)newsCache.set(key,{t:Date.now(),v});
+  const v=build();
+  if(v.items.length){newsCache.set(key,{t:Date.now(),v});saveStale(key,v.items)}
   return v;
 }
 
 /* ---------- Berita (tampilan) ---------- */
-const news={cat:'terbaru',q:'',data:null,loading:false,pending:null};
+const news={cat:'terbaru',q:'',data:null,loading:false,pending:null,req:0};
 function leadHTML(x){
   const t=esc(x.title);
   return '<a class="lead'+(x.img?'':' noimg')+'" href="'+esc(x.link)+'" target="_blank" rel="noopener"'+(x.img?'':' style="background:'+hue(x.src)+'"')+'>'
@@ -707,8 +736,14 @@ function renderNewsList(){
 async function loadNewsView(force){
   renderNewsCats();
   news.pending=null;$('#newsNew').hidden=true;
-  news.loading=true;renderNewsList();
-  try{news.data=await getNews(st.region,news.cat,force)}catch{news.data=null}
+  const my=++news.req,key=st.region+'|'+news.cat,stale=force?null:readStale(key);
+  if(stale){news.data={items:stale,failed:0,total:0};news.loading=false}
+  else{news.data=null;news.loading=true}
+  renderNewsList();
+  let d=null;
+  try{d=await getNews(st.region,news.cat,force,p=>{if(my!==news.req||!p.items.length)return;news.data=p;news.loading=false;renderNewsList()})}catch{}
+  if(my!==news.req)return;
+  if(d&&d.items.length)news.data=d;else if(!stale)news.data=null;
   news.loading=false;renderNewsList();
 }
 
@@ -773,13 +808,14 @@ async function loadQuake(){
 }
 async function loadHomeNews(){
   const box=$('#homeNews');
-  box.innerHTML=skelRows(3);
+  const stale=readStale(st.region+'|terbaru');
+  box.innerHTML=stale?stale.slice(0,5).map(rowHTML).join(''):skelRows(3);
   try{
-    const d=await getNews(st.region,'terbaru');
+    const d=await getNews(st.region,'terbaru',false,p=>{if(curTab==='home'&&p.items.length)box.innerHTML=p.items.slice(0,5).map(rowHTML).join('')});
     if(!d.items.length)throw 0;
     box.innerHTML=d.items.slice(0,5).map(rowHTML).join('');
   }catch{
-    box.innerHTML='<div class="empty"><b>Berita belum bisa dimuat</b>Periksa koneksi internet Anda.<br><button class="btn sm" data-act="home-reload">Coba lagi</button></div>';
+    if(!stale)box.innerHTML='<div class="empty"><b>Berita belum bisa dimuat</b>Periksa koneksi internet Anda.<br><button class="btn sm" data-act="home-reload">Coba lagi</button></div>';
   }
 }
 function renderResume(){
