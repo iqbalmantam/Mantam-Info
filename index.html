@@ -650,6 +650,7 @@ function parseRSS(xml,srcName,isGn){
     let src=srcName;
     const s=it.getElementsByTagName('source')[0];
     if(isGn&&s&&s.textContent){src=s.textContent.trim();title=title.replace(new RegExp('\\s+-\\s+'+src.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$'),'')}
+    if(/^https?:\/\//i.test(src)){try{src=new URL(src).hostname.replace(/^www\./,'')}catch{}}
     const rawDesc=txt(it,'description')||txt(it,'summary')||txt(it,'content:encoded');
     let img='';
     const en=it.getElementsByTagName('enclosure')[0];
