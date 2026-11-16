@@ -52,9 +52,16 @@ h1,h2,h3{font-family:var(--display);line-height:1.15;letter-spacing:-.01em}
 .region{flex:0 1 auto;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);padding:7px 12px 7px 10px;border-radius:999px;font-weight:600;font-size:14px;max-width:40vw;min-width:0}
 .region span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .round{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line)}
-.pwa{flex:none;display:flex;align-items:center;gap:6px;height:36px;padding:0 13px 0 10px;border-radius:999px;background:var(--green);color:#fff;font-weight:700;font-size:14px;box-shadow:0 0 0 0 rgba(15,138,92,.5);animation:pw 2.4s ease-out infinite}
+.pwa{flex:none;display:flex;align-items:center;gap:6px;width:36px;height:36px;justify-content:center;border-radius:50%;background:var(--green);color:#fff;font-weight:700;font-size:14px;box-shadow:0 0 0 0 rgba(15,138,92,.5);animation:pw 2.4s ease-out infinite}
 .pwa[hidden]{display:none}
-.pwa .ic{width:18px;height:18px;stroke-width:2.2}
+.pwa .ic{width:20px;height:20px;stroke-width:2.2}
+.pwa-tip{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 6px 10px 14px;border-radius:14px;background:color-mix(in srgb,var(--green) 12%,var(--card));border:1px solid color-mix(in srgb,var(--green) 35%,var(--line));font-size:14px;line-height:1.35}
+.pwa-tip[hidden]{display:none}
+.pwa-tip>svg{color:var(--green)}
+.pwa-tip b{display:block;font-size:14.5px}
+.pwa-tip span{color:var(--ink2)}
+.pwa-tip .go{margin-left:auto;flex:none;padding:8px 14px;border-radius:999px;background:var(--green);color:#fff;font-weight:700;font-size:14px}
+.pwa-tip .x{flex:none;width:32px;height:32px;display:grid;place-items:center;color:var(--ink2)}
 @keyframes pw{0%{box-shadow:0 0 0 0 rgba(15,138,92,.5)}70%,100%{box-shadow:0 0 0 10px rgba(15,138,92,0)}}
 @media (prefers-reduced-motion:reduce){.pwa{animation:none}}
 .strip{height:4px;background:var(--bars)}
@@ -220,8 +227,6 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
   .top-in{gap:6px;padding:10px 12px}
   .region{padding:7px 10px 7px 8px;font-size:13.5px;gap:4px;max-width:none}
   .round{width:36px;height:36px}
-  .top.has-pwa .region span{display:none}
-  .top.has-pwa .region{padding:7px 9px}
 }
 @media (min-width:700px){
   .news-grid{grid-template-columns:1fr 1fr}
@@ -273,7 +278,7 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
     <div class="top-in">
       <div class="brand"><span class="mark" aria-hidden="true"></span>Mantam Info</div>
       <button class="region" data-act="region-open" aria-label="Pilih wilayah"><svg class="ic"><use href="#i-pin"/></svg><span id="regionName">Indonesia</span></button>
-      <button class="pwa" id="installBtn" data-act="pwa-install" aria-label="Pasang aplikasi Mantam Info" title="Pasang aplikasi: buka lebih cepat, tanpa browser" hidden><svg class="ic"><use href="#i-download"/></svg><span>Pasang</span></button>
+      <button class="pwa" id="installBtn" data-act="pwa-install" aria-label="Pasang aplikasi Mantam Info" title="Pasang aplikasi: buka lebih cepat, tanpa browser" hidden><svg class="ic"><use href="#i-download"/></svg></button>
       <button class="round" data-act="theme" aria-label="Ganti tema"><svg class="ic"><use id="themeUse" href="#i-moon"/></svg></button>
     </div>
     <div class="strip" aria-hidden="true"></div>
@@ -284,6 +289,7 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
     <!-- BERANDA -->
     <section id="view-home" data-view="home">
       <div class="hello"><h1 id="helloTitle">Selamat datang</h1><p id="helloDate"></p></div>
+      <div class="pwa-tip" id="pwaTip" hidden><svg class="ic"><use href="#i-download"/></svg><div><b>Pasang di layar utama</b><span>Buka lebih cepat, tanpa browser.</span></div><button class="go" data-act="pwa-install">Pasang</button><button class="x" data-act="pwa-tip-x" aria-label="Tutup"><svg class="ic"><use href="#i-x"/></svg></button></div>
       <div class="wx" id="wxBox"><div class="skel" style="height:96px;opacity:.25"></div></div>
       <div id="quakeBox"></div>
 
@@ -1154,6 +1160,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,id=b.dataset.id;
   switch(a){
+    case 'pwa-tip-x':store.set('pwaTipX',1);$('#pwaTip').hidden=true;break;
     case 'pwa-install':if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.finally(()=>{deferredInstall=null;renderInstall()})}else toast('Di Safari: ketuk tombol Bagikan, lalu pilih Tambah ke Layar Utama.');break;
     case 'tab':show(b.dataset.tab);break;
     case 'region-open':renderRegions('');$('#regQ').value='';$('#regionDlg').showModal();break;
@@ -1215,8 +1222,7 @@ const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 function renderInstall(){
   const b=$('#installBtn');
   b.hidden=isStandalone()||!/^https?:$/.test(location.protocol)||!(deferredInstall||isIOS);
-  b.closest('.top').classList.toggle('has-pwa',!b.hidden);
-  if(!b.hidden&&!renderInstall.hinted&&!store.get('pwaHint')){renderInstall.hinted=1;store.set('pwaHint',1);setTimeout(()=>toast('Pasang Mantam Info: buka lebih cepat dari layar utama, hemat kuota.'),1500)}
+  $('#pwaTip').hidden=b.hidden||!!store.get('pwaTipX');
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;renderInstall()});
 window.addEventListener('appinstalled',()=>{deferredInstall=null;renderInstall();toast('Mantam Info terpasang.')});
