@@ -95,6 +95,20 @@ main{max-width:1120px;margin:auto;padding:14px 16px 190px}
 /* beranda */
 .hello h1{font-size:30px;font-weight:800}
 .hello p{color:var(--ink2);margin-top:2px}
+.digest{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px 16px 12px}
+.digest[hidden]{display:none}
+.dg-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+.dg-h b{font-family:var(--display);font-size:18px}
+.digest ul{list-style:none;margin:0;padding:0}
+.digest li{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:15px;line-height:1.35}
+.digest li:first-child{border-top:0}
+.digest li>span:first-child{flex:none;width:24px;text-align:center}
+.digest a{color:inherit;font-weight:600;text-decoration:none}
+.digest li small{display:block;color:var(--ink2);font-size:13px;margin-top:2px}
+.fact{margin-top:22px;padding:16px;border-radius:20px;background:color-mix(in srgb,#e8a800 14%,var(--card));border:1px solid color-mix(in srgb,#e8a800 40%,var(--line))}
+.fact b{display:block;font-family:var(--display);font-size:16px;margin-bottom:6px}
+.fact p{margin:0;font-size:15.5px;line-height:1.5}
+.fact .link{margin-top:10px}
 .wx{margin-top:16px;background:var(--wx-bg);color:var(--wx-fg);border-radius:20px;padding:18px}
 .wx-main{display:flex;align-items:center;gap:14px}
 .wx-t{font-family:var(--display);font-size:56px;font-weight:800;line-height:1}
@@ -288,11 +302,14 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
     <section id="view-home" data-view="home">
       <div class="hello"><h1 id="helloTitle">Selamat datang</h1><p id="helloDate"></p></div>
       <div class="pwa-tip" id="pwaTip" hidden><img src="icons/icon-192.png" alt="" width="46" height="46"><div><b>Pasang aplikasi</b><span>Lebih cepat, tanpa browser</span></div><button class="go" data-act="pwa-install"><svg class="ic"><use href="#i-download"/></svg>Pasang</button></div>
+      <div class="digest" id="digest" hidden></div>
       <div class="wx" id="wxBox"><div class="skel" style="height:96px;opacity:.25"></div></div>
       <div id="quakeBox"></div>
 
       <div class="sect-h"><h2>Berita utama</h2><button class="link" data-act="tab" data-tab="berita">Semua berita</button></div>
       <div id="homeNews"></div>
+
+      <div class="fact" id="factBox"></div>
 
       <div class="sect-h"><h2>Mau lihat apa?</h2></div>
       <div class="launch">
@@ -803,6 +820,75 @@ const WX=(c)=>{
     80:['Hujan lokal','🌦️'],81:['Hujan lokal','🌧️'],82:['Hujan lebat lokal','⛈️'],95:['Badai petir','⛈️'],96:['Badai petir','⛈️'],99:['Badai petir','⛈️']};
   return m[c]||(c>=71&&c<=77?['Berkabut','🌫️']:['Cuaca','🌡️']);
 };
+const FACTS=[
+  "Indonesia adalah negara kepulauan terbesar di dunia, dengan lebih dari 17.000 pulau.",
+  "Danau Toba di Sumatera Utara terbentuk dari letusan super gunung api dan merupakan danau vulkanik terbesar di dunia.",
+  "Komodo, kadal terbesar di dunia, hanya ditemukan di alam liar di Indonesia, yaitu di Pulau Komodo, Rinca, Flores, dan sekitarnya.",
+  "Indonesia berada di Cincin Api Pasifik dan memiliki sekitar 120-an gunung api aktif, salah satu yang terbanyak di dunia.",
+  "Ada sekitar 700 bahasa daerah yang dituturkan di Indonesia.",
+  "Perairan Raja Ampat di Papua Barat Daya dikenal memiliki salah satu keanekaragaman terumbu karang tertinggi di dunia.",
+  "Candi Borobudur di Magelang, Jawa Tengah, dibangun pada abad ke-9 dan merupakan candi Buddha terbesar di dunia.",
+  "Batik ditetapkan UNESCO sebagai Warisan Budaya Takbenda pada 2 Oktober 2009, yang kini diperingati sebagai Hari Batik Nasional.",
+  "Angklung, alat musik bambu dari Jawa Barat, diakui UNESCO sebagai Warisan Budaya Takbenda pada 2010.",
+  "Pencak silat diakui UNESCO sebagai Warisan Budaya Takbenda pada 2019.",
+  "Sumpah Pemuda diikrarkan pada 28 Oktober 1928: satu tanah air, satu bangsa, dan satu bahasa persatuan, Indonesia.",
+  "Proklamasi kemerdekaan Indonesia dibacakan pada 17 Agustus 1945 di Jakarta.",
+  "Puncak Jaya di Papua, setinggi sekitar 4.884 meter, adalah puncak tertinggi di Indonesia.",
+  "Sungai Kapuas di Kalimantan Barat adalah sungai terpanjang di Indonesia, sekitar 1.100 kilometer.",
+  "Kalimantan adalah pulau terbesar ketiga di dunia.",
+  "Rafflesia arnoldii, bunga terbesar di dunia, tumbuh di hutan Sumatera, dan sering disebut puspa langka.",
+  "Bunga bangkai (Amorphophallus titanum) berasal dari hutan hujan Sumatera.",
+  "Orangutan di alam liar hanya hidup di Pulau Sumatera dan Kalimantan.",
+  "Indonesia memiliki tiga zona waktu: WIB, WITA, dan WIT.",
+  "Nama Indonesia berasal dari bahasa Yunani: indos yang berarti India dan nesos yang berarti pulau.",
+  "Bahasa Indonesia berakar dari bahasa Melayu dan ditetapkan sebagai bahasa persatuan sejak Sumpah Pemuda 1928.",
+  "Lebih dari separuh penduduk Indonesia tinggal di Pulau Jawa.",
+  "Indonesia adalah negara berpenduduk terbesar keempat di dunia.",
+  "Letusan Gunung Krakatau pada 1883 terdengar hingga ribuan kilometer jauhnya.",
+  "Letusan Gunung Tambora pada 1815 tercatat sebagai salah satu letusan terbesar dalam sejarah dan memengaruhi iklim dunia pada 1816.",
+  "Subak, sistem pengairan sawah tradisional Bali, ditetapkan UNESCO sebagai Warisan Budaya Dunia pada 2012.",
+  "Tempe, makanan dari fermentasi kedelai, berasal dari Indonesia, khususnya Jawa.",
+  "Kereta cepat Jakarta-Bandung bernama Whoosh mulai beroperasi pada Oktober 2023, kereta cepat pertama di Asia Tenggara.",
+  "MRT Jakarta mulai beroperasi secara komersial pada Maret 2019.",
+  "Candi Prambanan, dibangun pada abad ke-9, adalah kompleks candi Hindu terbesar di Indonesia.",
+  "Semboyan Bhinneka Tunggal Ika diambil dari Kakawin Sutasoma karya Mpu Tantular.",
+  "Lagu Indonesia Raya karya W.R. Supratman pertama kali diperdengarkan pada Kongres Pemuda II, 28 Oktober 1928.",
+  "Danau Kelimutu di Flores, Nusa Tenggara Timur, memiliki tiga kawah yang warna airnya dapat berubah-ubah.",
+  "Burung cenderawasih, yang dijuluki burung surga, hidup di hutan Papua dan sekitarnya.",
+  "Dari Sabang di Aceh sampai Merauke di Papua, rentang wilayah Indonesia lebih dari 5.000 kilometer.",
+  "Wayang kulit diakui UNESCO sebagai karya agung warisan budaya lisan dan takbenda pada 2003.",
+  "Tari Saman dari Gayo, Aceh, diakui UNESCO sebagai Warisan Budaya Takbenda pada 2011.",
+  "Indonesia adalah salah satu produsen minyak kelapa sawit dan nikel terbesar di dunia.",
+  "Taman Nasional Lorentz di Papua adalah kawasan lindung terluas di Asia Tenggara dan masuk Warisan Dunia UNESCO.",
+  "Gamelan ditetapkan UNESCO sebagai Warisan Budaya Takbenda pada 2021.",
+  "Pantun, tradisi berbalas bait khas Melayu, diakui UNESCO sebagai Warisan Budaya Takbenda pada 2020."
+];
+const home={wx:null,q:null,news:[]};
+function shareText(t){
+  const url=location.origin+location.pathname;
+  const full=t+'\n\nMantam Info: '+url;
+  if(navigator.share){navigator.share({text:full}).catch(()=>{})}
+  else if(navigator.clipboard){navigator.clipboard.writeText(full).then(()=>toast('Teks disalin, tinggal ditempel.'),()=>toast('Tidak bisa menyalin.'))}
+  else toast('Fitur bagikan tidak tersedia di browser ini.');
+}
+function todayFact(){return FACTS[Math.floor((Date.now()+25200000)/86400000)%FACTS.length]}
+function renderFact(){
+  $('#factBox').innerHTML='<b>Tahukah Anda?</b><p>'+esc(todayFact())+'</p><button class="link" data-act="share-fact">Bagikan</button>';
+}
+function digestLines(){
+  const L=[];
+  if(home.wx)L.push({e:home.wx.e,t:home.wx.place+' '+home.wx.t+'°, '+home.wx.d.toLowerCase()+(home.wx.rain!=null?'. Peluang hujan '+home.wx.rain+'%':'')});
+  if(home.q)L.push({e:'🌋',t:'Gempa M'+home.q.mag+', '+home.q.wil+' ('+home.q.jam+')'});
+  home.news.forEach(n=>L.push({e:'📰',t:n.title,link:n.link,src:n.src}));
+  return L;
+}
+function renderDigest(){
+  const el=$('#digest'),L=digestLines();
+  if(!L.length){el.hidden=true;return}
+  el.hidden=false;
+  el.innerHTML='<div class="dg-h"><b>Ringkasan hari ini</b><button class="link" data-act="share-digest">Bagikan</button></div><ul>'
+    +L.map(x=>'<li><span>'+x.e+'</span><div>'+(x.link?'<a href="'+esc(x.link)+'" target="_blank" rel="noopener noreferrer">'+esc(x.t)+'</a><small>'+esc(x.src||'')+'</small>':esc(x.t))+'</div></li>').join('')+'</ul>';
+}
 function greet(){
   const h=new Date().getHours();
   return h<11?'Selamat pagi':h<15?'Selamat siang':h<18?'Selamat sore':'Selamat malam';
@@ -821,6 +907,7 @@ async function loadWeather(){
     const arr=Array.isArray(j)?j:[j];
     if(p){
       const d=arr[0],c=d.current,w=WX(c.weather_code);
+      home.wx={place:p.cap,t:Math.round(c.temperature_2m),d:w[0],e:w[1],rain:d.daily.precipitation_probability_max[0]??null};renderDigest();
       const days=d.daily.time.map((t,i)=>{
         const dn=i===0?'Hari ini':i===1?'Besok':new Date(t+'T12:00:00').toLocaleDateString('id-ID',{weekday:'long'});
         const wd=WX(d.daily.weather_code[i]);
@@ -829,6 +916,7 @@ async function loadWeather(){
       box.innerHTML='<h3>Cuaca di '+esc(p.cap)+'</h3><div class="wx-main"><div class="wx-e">'+w[1]+'</div><div><div class="wx-t">'+Math.round(c.temperature_2m)+'°</div><div class="wx-d">'+esc(w[0])+', terasa '+Math.round(c.apparent_temperature)+'°</div></div></div>'
         +'<div class="wx-d" style="margin-top:8px">Kelembapan '+Math.round(c.relative_humidity_2m)+'%, angin '+Math.round(c.wind_speed_10m)+' km/jam</div><div class="wx-days">'+days+'</div>';
     }else{
+      {const w0=WX(arr[0].current.weather_code);home.wx={place:BIG[0].n,t:Math.round(arr[0].current.temperature_2m),d:w0[0],e:w0[1],rain:null};renderDigest()}
       box.innerHTML='<h3>Cuaca kota-kota besar</h3><div class="wx-strip">'+arr.map((d,i)=>{
         const w=WX(d.current.weather_code);
         return '<div class="wx-city"><b>'+esc(BIG[i].n)+'</b><span class="t">'+Math.round(d.current.temperature_2m)+'°</span><div class="wx-d">'+w[1]+' '+esc(w[0])+'</div></div>';
@@ -845,6 +933,7 @@ async function loadQuake(){
     const [a,b]=await Promise.allSettled([fetchText(BMKG+'autogempa.json').then(JSON.parse),fetchText(BMKG+'gempadirasakan.json').then(JSON.parse)]);
     if(a.status!=='fulfilled')throw 0;
     const g=a.value.Infogempa.gempa;
+    home.q={mag:g.Magnitude,wil:g.Wilayah,jam:g.Jam};renderDigest();
     const felt=b.status==='fulfilled'?(b.value.Infogempa.gempa||[]).slice(0,8):[];
     box.innerHTML='<div class="quake"><div class="q-mag"><div><b>'+esc(g.Magnitude)+'</b><br><span>magnitudo</span></div></div>'
       +'<div class="q-body"><small>Gempa bumi terbaru</small><b>'+esc(g.Wilayah)+'</b><small>'+esc(g.Tanggal)+', '+esc(g.Jam)+'. Kedalaman '+esc(g.Kedalaman)+'.</small><small>'+esc(g.Potensi||'')+(g.Dirasakan&&g.Dirasakan.trim()!=='-'?' Dirasakan: '+esc(g.Dirasakan):'')+'</small></div>'
@@ -857,11 +946,12 @@ async function loadQuake(){
 async function loadHomeNews(){
   const box=$('#homeNews');
   const stale=readStale(st.region+'|terbaru');
+  if(stale){home.news=stale.slice(0,3);renderDigest()}
   box.innerHTML=stale?stale.slice(0,5).map(rowHTML).join(''):skelRows(3);
   try{
-    const d=await getNews(st.region,'terbaru',false,p=>{if(curTab==='home'&&p.items.length)box.innerHTML=p.items.slice(0,5).map(rowHTML).join('')});
+    const d=await getNews(st.region,'terbaru',false,p=>{if(curTab==='home'&&p.items.length){box.innerHTML=p.items.slice(0,5).map(rowHTML).join('');home.news=p.items.slice(0,3);renderDigest()}});
     if(!d.items.length)throw 0;
-    box.innerHTML=d.items.slice(0,5).map(rowHTML).join('');
+    box.innerHTML=d.items.slice(0,5).map(rowHTML).join('');home.news=d.items.slice(0,3);renderDigest();
   }catch{
     if(!stale)box.innerHTML='<div class="empty"><b>Berita belum bisa dimuat</b>Periksa koneksi internet Anda.<br><button class="btn sm" data-act="home-reload">Coba lagi</button></div>';
   }
@@ -876,7 +966,8 @@ function renderResume(){
 function loadHome(){
   $('#helloTitle').textContent=greet();
   $('#helloDate').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+(prov()?'. Menampilkan '+prov().n+'.':'');
-  renderResume();
+  renderResume();renderFact();
+  home.wx=null;home.news=[];renderDigest();
   loadWeather();loadQuake();loadHomeNews();
 }
 
@@ -1268,6 +1359,8 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,id=b.dataset.id;
   switch(a){
+    case 'share-fact':shareText('Tahukah Anda?\n'+todayFact());break;
+    case 'share-digest':shareText('Ringkasan hari ini, '+new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'\n'+digestLines().map(x=>'• '+x.t).join('\n'));break;
     case 'pwa-install':if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.finally(()=>{deferredInstall=null;renderInstall()})}else toast('Di Safari: ketuk tombol Bagikan, lalu pilih Tambah ke Layar Utama.');break;
     case 'tab':show(b.dataset.tab);break;
     case 'region-open':renderRegions('');$('#regQ').value='';$('#regionDlg').showModal();break;
