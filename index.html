@@ -116,6 +116,11 @@ main{max-width:1120px;margin:auto;padding:14px 16px 190px}
 .lt .ic{width:26px;height:26px}
 .lt.tvc .ic{color:var(--red)}.lt.rdc .ic{color:var(--green)}
 .resume{display:grid;gap:10px}
+.install{margin-top:14px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--green);border-radius:6px 16px 16px 6px;padding:12px 14px}
+.install img{width:44px;height:44px;border-radius:10px}
+.install b{display:block;font-family:var(--display);font-size:16px}
+.install small{display:block;color:var(--ink2);font-size:13px;line-height:1.35}
+.install .acts{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}
 .foot{margin-top:28px;font-size:12.5px;color:var(--ink2);line-height:1.5}
 .foot a{color:var(--blue);font-weight:600}
 
@@ -209,6 +214,13 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
 .field input,.field select{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit}
 .toast{position:fixed;z-index:80;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + env(safe-area-inset-bottom) + 84px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:calc(100vw - 32px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
 
+@media (max-width:420px){
+  .brand{font-size:18px;gap:7px}
+  .mark{width:22px;height:22px;border-radius:6px}
+  .top-in{gap:8px;padding:10px 12px}
+  .region{padding:7px 10px 7px 8px;font-size:13.5px;gap:4px;max-width:none}
+  .round{width:38px;height:38px}
+}
 @media (min-width:700px){
   .news-grid{grid-template-columns:1fr 1fr}
   .resume{grid-template-columns:1fr 1fr}
@@ -268,6 +280,7 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
     <!-- BERANDA -->
     <section id="view-home" data-view="home">
       <div class="hello"><h1 id="helloTitle">Selamat datang</h1><p id="helloDate"></p></div>
+      <div class="install" id="installCard" hidden></div>
       <div class="wx" id="wxBox"><div class="skel" style="height:96px;opacity:.25"></div></div>
       <div id="quakeBox"></div>
 
@@ -1138,6 +1151,8 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,id=b.dataset.id;
   switch(a){
+    case 'pwa-install':if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.finally(()=>{deferredInstall=null;renderInstall()})}break;
+    case 'pwa-dismiss':store.set('installDismiss',true);$('#installCard').hidden=true;break;
     case 'tab':show(b.dataset.tab);break;
     case 'region-open':renderRegions('');$('#regQ').value='';$('#regionDlg').showModal();break;
     case 'region-pick':setRegion(id);break;
@@ -1191,7 +1206,24 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
 
+/* ---------- pasang aplikasi ---------- */
+let deferredInstall=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+function renderInstall(){
+  const c=$('#installCard');
+  if(isStandalone()||store.get('installDismiss',false)||!/^https?:$/.test(location.protocol)){c.hidden=true;return}
+  let msg,btn='';
+  if(deferredInstall){msg='Ikon di layar utama dan tampil layar penuh, tanpa Play Store.';btn='<button class="btn sm" data-act="pwa-install">Pasang sekarang</button>'}
+  else if(/iphone|ipad|ipod/i.test(navigator.userAgent))msg='Di Safari, ketuk tombol Bagikan, lalu pilih Tambah ke Layar Utama.';
+  else msg='Buka menu ⋮ di browser, lalu pilih Pasang aplikasi atau Tambahkan ke layar utama.';
+  c.innerHTML='<img src="icons/icon-192.png" alt=""><div><b>Pasang Mantam Info di HP</b><small>'+esc(msg)+'</small></div><div class="acts">'+btn+'<button class="btn alt sm" data-act="pwa-dismiss">Nanti saja</button></div>';
+  c.hidden=false;
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;renderInstall()});
+window.addEventListener('appinstalled',()=>{deferredInstall=null;$('#installCard').hidden=true;toast('Mantam Info terpasang.')});
+
 /* ---------- mulai ---------- */
+renderInstall();
 $('#regionName').textContent=regionLabel();
 show((location.hash||'#home').slice(1),false);
 })();
