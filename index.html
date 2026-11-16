@@ -131,6 +131,7 @@ main{max-width:1120px;margin:auto;padding:14px 16px 190px}
 
 /* TV */
 .tv-layout{display:grid;gap:14px}
+.tv-layout>*{min-width:0}
 .stage{position:sticky;top:60px;z-index:10;background:var(--paper);padding-bottom:6px}
 .screen{position:relative;aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden}
 .screen video,.screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
@@ -773,7 +774,7 @@ function parseM3U(t){
       let name=l.split(',').slice(1).join(',').trim();
       const geo=/geo-?blocked/i.test(name);
       name=name.replace(/\s*\[[^\]]*\]\s*/g,' ').replace(/\s*\(\d{3,4}p\)\s*/g,' ').replace(/\s+/g,' ').trim()||at('tvg-name');
-      cur={name,logo:at('tvg-logo'),group:(at('group-title')||'Lainnya').split(';')[0].trim()||'Lainnya',geo};
+      cur={name,logo:at('tvg-logo'),group:(at('group-title')||'Lainnya').split(';')[0].trim().replace(/^undefined$/i,'Lainnya')||'Lainnya',geo};
     }else if(l[0]!=='#'&&cur){
       cur.url=l;cur.id='t'+hash(l);
       if(!seen.has(cur.id)&&/^https?:/i.test(l)){seen.add(cur.id);out.push(cur)}
@@ -787,11 +788,11 @@ const probe={ok:new Set(),bad:new Set(),running:false,done:0,total:0,loaded:fals
 let probeT=0;
 function loadProbeCache(){
   probe.loaded=true;
-  const c=store.get('probe',null);
+  const c=store.get('probe2',null);
   if(c&&c.ok&&Date.now()-c.t<43200000){probeT=c.t;c.ok.forEach(i=>probe.ok.add(i));c.bad.forEach(i=>probe.bad.add(i))}
   else probeT=Date.now();
 }
-function saveProbe(){store.set('probe',{t:probeT||Date.now(),ok:[...probe.ok],bad:[...probe.bad]})}
+function saveProbe(){store.set('probe2',{t:probeT||Date.now(),ok:[...probe.ok],bad:[...probe.bad]})}
 async function probeOne(c){
   if(kindOf(c.url)!=='hls')return false;
   try{
@@ -799,13 +800,13 @@ async function probeOne(c){
     if(!r.ok)return false;
     const t=(await r.text()).trim();
     if(!t.startsWith('#EXTM3U'))return false;
-    if(t.includes('#EXTINF'))return true;
+    if(t.includes('#EXTINF'))return !t.includes('#EXT-X-ENDLIST');
     const line=t.split(/\r?\n/).find((l,i,a)=>l&&l[0]!=='#'&&a[i-1]&&a[i-1].startsWith('#EXT-X-STREAM-INF'));
     if(!line)return false;
     const r2=await fetchTimeout(new URL(line,c.url).href,{},7000);
     if(!r2.ok)return false;
     const t2=await r2.text();
-    return t2.includes('#EXTINF');
+    return t2.includes('#EXTINF')&&!t2.includes('#EXT-X-ENDLIST');
   }catch{return false}
 }
 async function runProbe(){
@@ -1133,7 +1134,7 @@ document.addEventListener('click',e=>{
     case 'tv-cat':tv.cat=id;tv.limit=60;renderTV();break;
     case 'tv-more':tv.limit+=60;renderTV();break;
     case 'tv-retry':tv.list=null;loadTV();break;
-    case 'tv-recheck':probe.ok.clear();probe.bad.clear();sess.set('bad',[]);probeT=Date.now();store.set('probe',null);runProbe();break;
+    case 'tv-recheck':probe.ok.clear();probe.bad.clear();sess.set('bad',[]);probeT=Date.now();store.set('probe2',null);runProbe();break;
     case 'tv-play':{const c=[...st.custom.tv.map(x=>Object.assign({},x,{custom:true})),...(tv.list||[])].find(x=>x.id===id);if(c)playTV(c);break}
     case 'tv-fav':e.stopPropagation();toggleFav('tv',id);renderTV();updateTvBar();break;
     case 'tv-fav-cur':if(tv.cur){toggleFav('tv',tv.cur.id);updateTvBar();renderTV()}break;
