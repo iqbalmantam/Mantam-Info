@@ -311,6 +311,7 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
       <div class="sect-h" style="margin-top:6px"><h2 id="newsTitle">Berita</h2></div>
       <div class="chips" id="newsCats" role="group" aria-label="Kategori berita"></div>
       <label class="search"><svg class="ic"><use href="#i-search"/></svg><span class="sr">Cari berita</span><input id="newsQ" type="search" placeholder="Cari judul berita" autocomplete="off"></label>
+      <div class="chips" id="newsSrc" role="group" aria-label="Filter sumber" hidden></div>
       <button class="newpill" id="newsNew" data-act="news-show" hidden></button>
       <div id="newsBox"></div>
     </section>
@@ -594,6 +595,14 @@ const NAT=[
   {name:'Tempo',url:'https://rss.tempo.co/nasional'},
   {name:'Republika',url:'https://www.republika.co.id/rss'},
   {name:'Suara.com',url:'https://www.suara.com/rss'},
+  {name:'CNBC Indonesia',url:'https://www.cnbcindonesia.com/news/rss'},
+  {name:'Liputan6',url:'https://feed.liputan6.com/rss'},
+  {name:'Tribunnews',url:'https://www.tribunnews.com/rss'},
+  {name:'BBC Indonesia',url:'https://feeds.bbci.co.uk/indonesia/rss.xml'},
+  {name:'Bisnis.com',url:'https://www.bisnis.com/rss'},
+  {name:'Okezone',url:'https://sindikasi.okezone.com/index.php/rss/0/RSS2.0'},
+  {name:'JPNN',url:'https://www.jpnn.com/index.php?mib=rss'},
+  {name:'SINDOnews',url:'https://www.sindonews.com/feed'},
   {name:'Berita terbaru',url:gnews('berita Indonesia when:1d'),gn:true}
 ];
 const CATS=[
@@ -614,6 +623,8 @@ function feedsFor(regionId,catId){
     if(c.id==='terbaru')return NAT;
     const f=[{name:'Berita '+c.n,url:gnews(c.q+' Indonesia when:3d'),gn:true}];
     if(c.ant)f.unshift({name:'ANTARA',url:'https://www.antaranews.com/rss/'+c.ant+'.xml'});
+    if(c.id==='ekonomi')f.push({name:'CNBC Indonesia',url:'https://www.cnbcindonesia.com/news/rss'},{name:'Bisnis.com',url:'https://www.bisnis.com/rss'});
+    if(c.id==='dunia')f.push({name:'BBC Indonesia',url:'https://feeds.bbci.co.uk/indonesia/rss.xml'});
     return f;
   }
   const f=[];
@@ -652,13 +663,27 @@ function parseRSS(xml,srcName,isGn){
   }).filter(x=>x.title&&x.link);
 }
 const feedCache=new Map();
+// sumber yang gagal berulang dilewati 6 jam, lalu dicoba lagi
+const FH_KEY='mi:fh';
+const fhRead=()=>{try{return JSON.parse(localStorage.getItem(FH_KEY)||'{}')}catch{return{}}};
+const fhWrite=o=>{try{localStorage.setItem(FH_KEY,JSON.stringify(o))}catch{}};
+const feedSkipped=url=>{const h=fhRead()[url];return !!(h&&h.f>=2&&Date.now()-h.t<21600000)};
+function feedMark(url,ok){
+  const o=fhRead();
+  if(ok){if(o[url]){delete o[url];fhWrite(o)}return}
+  const h=o[url]||{f:0};h.f++;h.t=Date.now();o[url]=h;fhWrite(o);
+}
 async function getFeed(f){
   const c=feedCache.get(f.url);
   if(c&&Date.now()-c.t<300000)return c.v;
-  const xml=await fetchText(f.url);
-  const v=parseRSS(xml,f.name,!!f.gn);
-  feedCache.set(f.url,{t:Date.now(),v});
-  return v;
+  try{
+    const xml=await fetchText(f.url);
+    const v=parseRSS(xml,f.name,!!f.gn);
+    if(!v.length)throw new Error('kosong');
+    feedMark(f.url,true);
+    feedCache.set(f.url,{t:Date.now(),v});
+    return v;
+  }catch(e){feedMark(f.url,false);throw e}
 }
 const newsCache=new Map();
 function readStale(key){
@@ -678,7 +703,8 @@ async function getNews(regionId,catId,force,onPart){
   const key=regionId+'|'+catId;
   const c=newsCache.get(key);
   if(!force&&c&&Date.now()-c.t<300000)return c.v;
-  const feeds=feedsFor(regionId,catId);
+  const all=feedsFor(regionId,catId);
+  const feeds=all.filter(f=>f.gn||f.url.includes('antaranews.com')||!feedSkipped(f.url));
   const lists=[];let failed=0;
   const build=()=>{
     const seen=new Set();let items=[];
@@ -699,7 +725,7 @@ async function getNews(regionId,catId,force,onPart){
 }
 
 /* ---------- Berita (tampilan) ---------- */
-const news={cat:'terbaru',q:'',data:null,loading:false,pending:null,req:0};
+const news={cat:'terbaru',q:'',data:null,loading:false,pending:null,req:0,src:''};
 function leadHTML(x){
   const t=esc(x.title);
   return '<a class="lead'+(x.img?'':' noimg')+'" href="'+esc(x.link)+'" target="_blank" rel="noopener"'+(x.img?'':' style="background:'+hue(x.src)+'"')+'>'
@@ -718,6 +744,16 @@ function renderNewsCats(){
   $('#newsCats').innerHTML=CATS.map(c=>'<button class="chip" data-act="news-cat" data-id="'+c.id+'" aria-pressed="'+(news.cat===c.id)+'">'+esc(c.n)+'</button>').join('');
   $('#newsTitle').textContent='Berita '+(prov()?prov().n:'Indonesia');
 }
+function renderSrcChips(all){
+  const el=$('#newsSrc'),cnt={};
+  all.forEach(x=>{if(x.src)cnt[x.src]=(cnt[x.src]||0)+1});
+  const top=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).slice(0,10);
+  if(news.src&&!top.includes(news.src)){news.src=''}
+  if(top.length<2){el.hidden=true;return}
+  el.hidden=false;
+  el.innerHTML='<button class="chip" data-act="news-src" data-id="" aria-pressed="'+(!news.src)+'">Semua sumber</button>'
+    +top.map(n=>'<button class="chip" data-act="news-src" data-id="'+esc(n)+'" aria-pressed="'+(news.src===n)+'">'+esc(n)+'</button>').join('');
+}
 function renderNewsList(){
   const box=$('#newsBox');
   if(news.loading){box.innerHTML='<div class="skel" style="aspect-ratio:16/9;border-radius:20px"></div>'+skelRows(5);return}
@@ -727,7 +763,9 @@ function renderNewsList(){
     return;
   }
   const q=news.q.trim().toLowerCase();
-  let items=q?d.items.filter(x=>(x.title+' '+x.desc+' '+x.src).toLowerCase().includes(q)):d.items;
+  renderSrcChips(d.items);
+  let items=news.src?d.items.filter(x=>x.src===news.src):d.items;
+  if(q)items=items.filter(x=>(x.title+' '+x.desc+' '+x.src).toLowerCase().includes(q));
   if(!items.length){box.innerHTML='<div class="empty"><b>Tidak ada hasil</b>Tidak ada berita yang cocok dengan “'+esc(news.q)+'”.</div>';return}
   const lead=items[0],rest=items.slice(1);
   box.innerHTML=(d.failed?'<p class="note">'+d.failed+' dari '+d.total+' sumber sedang tidak merespons; berita di bawah dari sumber lainnya.</p>':'')
@@ -1226,7 +1264,8 @@ document.addEventListener('click',e=>{
     case 'region-pick':setRegion(id);break;
     case 'close-dlg':b.closest('dialog').close();break;
     case 'theme':{const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';st.theme=t;store.set('theme',t);applyTheme(t);break}
-    case 'news-cat':news.cat=id;loadNewsView();break;
+    case 'news-cat':news.cat=id;news.src='';loadNewsView();break;
+    case 'news-src':news.src=id||'';renderNewsList();break;
     case 'news-refresh':loadNewsView(true);break;
     case 'news-show':if(news.pending){news.data=news.pending;news.pending=null;$('#newsNew').hidden=true;renderNewsList();window.scrollTo({top:0,behavior:'smooth'})}break;
     case 'home-reload':loadHomeNews();break;
