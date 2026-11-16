@@ -965,7 +965,8 @@ async function loadRadio(){
   try{
     const j=await rbFetch('/json/stations/search?countrycode=ID&hidebroken=true&order=clickcount&reverse=true&limit=700');
     const seen=new Set();let hidden=0;
-    radio.list=j.filter(s=>s.lastcheckok===1&&(s.url_resolved||s.url)&&(s.name||'').trim()).map(s=>({
+    const rbad=radioBad();
+    radio.list=j.filter(s=>s.lastcheckok===1&&s.ssl_error!==1&&(s.url_resolved||s.url)&&(s.name||'').trim()&&!rbad.has(s.stationuuid)).map(s=>({
       id:s.stationuuid,name:s.name.trim(),url:s.url_resolved||s.url,logo:s.favicon||'',state:(s.state||'').trim(),
       tags:(s.tags||'').toLowerCase(),codec:s.codec||'',br:s.bitrate||0,hls:!!s.hls
     })).filter(s=>{
@@ -984,8 +985,15 @@ const RCATS=[
   ['religi','Religi',s=>/islam|quran|religi|dakwah|kristen|gospel|christian|rohani/.test(s.tags+' '+s.name.toLowerCase())],
   ['rri','RRI',s=>/^rri\b/i.test(s.name)]
 ];
+const radioBad=()=>{
+  const m=store.get('rbad',{}),now=Date.now(),o={};
+  Object.keys(m).forEach(k=>{if(now-m[k]<604800000)o[k]=m[k]});
+  return new Set(Object.keys(o));
+};
+function markRadioBad(id){const m=store.get('rbad',{});m[id]=Date.now();store.set('rbad',m)}
 function radioItems(){
-  let a=[...st.custom.radio.map(c=>Object.assign({tags:'',state:'',br:0,custom:true},c)),...(radio.list||[])];
+  const rb=radioBad();
+  let a=[...st.custom.radio.map(c=>Object.assign({tags:'',state:'',br:0,custom:true},c)),...(radio.list||[]).filter(s=>!rb.has(s.id))];
   if(radio.cat==='favorit')a=a.filter(s=>st.fav.radio.includes(s.id));
   else if(radio.cat==='daerah')a=a.filter(s=>matchRegion(s.state+' '+s.name));
   else if(radio.cat==='kustom')a=a.filter(s=>s.custom);
@@ -1010,12 +1018,12 @@ function renderRadio(){
   RCATS.forEach(r=>chips.push([r[0],r[1]]));
   if(st.custom.radio.length)chips.push(['kustom','Stasiun saya']);
   $('#rdChips').innerHTML=chips.map(c=>'<button class="chip" data-act="rd-cat" data-id="'+c[0]+'" aria-pressed="'+(radio.cat===c[0])+'">'+esc(c[1])+'</button>').join('')
-    +'<button class="chip" data-act="add-open" data-type="radio" style="display:flex;gap:6px;align-items:center">'+ic('plus','width:16px;height:16px')+'Tambah stasiun</button>';
+    +'<button class="chip" data-act="add-open" data-type="radio" style="display:flex;gap:6px;align-items:center">'+ic('plus','width:16px;height:16px')+'Tambah stasiun</button><button class="chip" data-act="rd-reset">Pulihkan daftar</button>';
   const l=$('#rdList'),note=$('#rdNote'),more=$('#rdMore');
   if(radio.loading){l.innerHTML=skelRows(6);note.textContent='Memuat daftar stasiun…';more.innerHTML='';return}
   if(radio.err&&!st.custom.radio.length){l.innerHTML='<div class="empty"><b>Daftar radio belum bisa dimuat</b>Periksa koneksi, lalu coba lagi.<br><button class="btn sm" data-act="rd-retry">Coba lagi</button></div>';note.textContent='';more.innerHTML='';return}
   const items=radioItems();
-  note.textContent=(items.length?items.length+' stasiun, hanya yang lolos pemeriksaan terakhir. ':'')+(radio.hidden?radio.hidden+' stasiun beralamat http disembunyikan karena tidak bisa diputar di halaman https.':'');
+  note.textContent=(items.length?items.length+' stasiun aktif. Stasiun yang gagal diputar otomatis dihapus dari daftar. ':'')+(radio.hidden?radio.hidden+' stasiun beralamat http disembunyikan karena tidak bisa diputar di halaman https.':'');
   if(!items.length){l.innerHTML='<div class="empty"><b>Tidak ada stasiun</b>'+(radio.cat==='favorit'?'Tekan bintang pada stasiun untuk menyimpannya di sini.':radio.cat==='daerah'?'Belum ada stasiun yang cocok dengan wilayah ini. Coba kata kunci kota di kolom cari.':'Coba kata kunci lain.')+'</div>';more.innerHTML='';return}
   l.innerHTML=items.slice(0,radio.limit).map(rowRadioHTML).join('');
   more.innerHTML=items.length>radio.limit?'<button class="btn alt" data-act="rd-more">Tampilkan lebih banyak</button>':'';
@@ -1064,8 +1072,9 @@ function playRadio(s){
 function radFail(s){
   if(!radio.cur||radio.cur.id!==s.id)return;
   radio.failed=true;
+  if(!s.custom){markRadioBad(s.id)}
   setMini(s,'Siaran tidak bisa diputar',false);
-  toast(s.name+' sedang tidak bisa diputar. Coba stasiun lain.');
+  toast(s.name+' tidak bisa diputar dan dihapus dari daftar. Coba stasiun lain.');
   renderRadioRows();
 }
 function stopRadio(silent){
@@ -1146,6 +1155,7 @@ document.addEventListener('click',e=>{
     case 'tv-fav-cur':if(tv.cur){toggleFav('tv',tv.cur.id);updateTvBar();renderTV()}break;
     case 'rd-cat':radio.cat=id;radio.limit=80;renderRadio();break;
     case 'rd-more':radio.limit+=80;renderRadio();break;
+    case 'rd-reset':store.set('rbad',{});radio.list=null;loadRadio();toast('Daftar radio dipulihkan.');break;
     case 'rd-retry':radio.list=null;loadRadio();break;
     case 'radio-play':{
       const s=[...st.custom.radio.map(x=>Object.assign({tags:'',state:'',br:0,custom:true},x)),...(radio.list||[])].find(x=>x.id===id);
