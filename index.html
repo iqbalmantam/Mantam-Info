@@ -55,13 +55,15 @@ h1,h2,h3{font-family:var(--display);line-height:1.15;letter-spacing:-.01em}
 .pwa{flex:none;display:flex;align-items:center;gap:6px;width:36px;height:36px;justify-content:center;border-radius:50%;background:var(--green);color:#fff;font-weight:700;font-size:14px;box-shadow:0 0 0 0 rgba(15,138,92,.5);animation:pw 2.4s ease-out infinite}
 .pwa[hidden]{display:none}
 .pwa .ic{width:20px;height:20px;stroke-width:2.2}
-.pwa-tip{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 6px 10px 14px;border-radius:14px;background:color-mix(in srgb,var(--green) 12%,var(--card));border:1px solid color-mix(in srgb,var(--green) 35%,var(--line));font-size:14px;line-height:1.35}
+.pwa-tip{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px;border-radius:18px;color:#fff;background:linear-gradient(135deg,#0b6b4a,#0f8a5c 60%,#14a06b);box-shadow:0 6px 18px -8px rgba(15,138,92,.7)}
 .pwa-tip[hidden]{display:none}
-.pwa-tip>svg{color:var(--green)}
-.pwa-tip b{display:block;font-size:14.5px}
-.pwa-tip span{color:var(--ink2)}
-.pwa-tip .go{margin-left:auto;flex:none;padding:8px 14px;border-radius:999px;background:var(--green);color:#fff;font-weight:700;font-size:14px}
-.pwa-tip .x{flex:none;width:32px;height:32px;display:grid;place-items:center;color:var(--ink2)}
+.pwa-tip img{flex:none;width:46px;height:46px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.pwa-tip div{min-width:0;flex:1;line-height:1.25}
+.pwa-tip b{display:block;font-family:var(--display);font-size:16px;font-weight:800}
+.pwa-tip span{display:block;font-size:12.5px;opacity:.92;margin-top:2px}
+.pwa-tip .go{flex:none;display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:999px;background:#fff;color:#0b6b4a;font-weight:800;font-size:14px}
+@media (max-width:340px){.brand{font-size:15px;gap:5px}.region{max-width:none}.pwa-tip span{font-size:12px}}
+.pwa-tip .go .ic{width:17px;height:17px;stroke-width:2.3}
 @keyframes pw{0%{box-shadow:0 0 0 0 rgba(15,138,92,.5)}70%,100%{box-shadow:0 0 0 10px rgba(15,138,92,0)}}
 @media (prefers-reduced-motion:reduce){.pwa{animation:none}}
 .strip{height:4px;background:var(--bars)}
@@ -289,7 +291,7 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
     <!-- BERANDA -->
     <section id="view-home" data-view="home">
       <div class="hello"><h1 id="helloTitle">Selamat datang</h1><p id="helloDate"></p></div>
-      <div class="pwa-tip" id="pwaTip" hidden><svg class="ic"><use href="#i-download"/></svg><div><b>Pasang di layar utama</b><span>Buka lebih cepat, tanpa browser.</span></div><button class="go" data-act="pwa-install">Pasang</button><button class="x" data-act="pwa-tip-x" aria-label="Tutup"><svg class="ic"><use href="#i-x"/></svg></button></div>
+      <div class="pwa-tip" id="pwaTip" hidden><img src="icons/icon-192.png" alt="" width="46" height="46"><div><b>Pasang aplikasi</b><span>Lebih cepat, tanpa browser</span></div><button class="go" data-act="pwa-install"><svg class="ic"><use href="#i-download"/></svg>Pasang</button></div>
       <div class="wx" id="wxBox"><div class="skel" style="height:96px;opacity:.25"></div></div>
       <div id="quakeBox"></div>
 
@@ -1160,7 +1162,6 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,id=b.dataset.id;
   switch(a){
-    case 'pwa-tip-x':store.set('pwaTipX',1);$('#pwaTip').hidden=true;break;
     case 'pwa-install':if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.finally(()=>{deferredInstall=null;renderInstall()})}else toast('Di Safari: ketuk tombol Bagikan, lalu pilih Tambah ke Layar Utama.');break;
     case 'tab':show(b.dataset.tab);break;
     case 'region-open':renderRegions('');$('#regQ').value='';$('#regionDlg').showModal();break;
@@ -1222,7 +1223,7 @@ const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 function renderInstall(){
   const b=$('#installBtn');
   b.hidden=isStandalone()||!/^https?:$/.test(location.protocol)||!(deferredInstall||isIOS);
-  $('#pwaTip').hidden=b.hidden||!!store.get('pwaTipX');
+  $('#pwaTip').hidden=b.hidden;
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;renderInstall()});
 window.addEventListener('appinstalled',()=>{deferredInstall=null;renderInstall();toast('Mantam Info terpasang.')});
