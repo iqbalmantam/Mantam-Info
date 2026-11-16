@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mantam Info — berita, TV, radio, dan CCTV Indonesia</title>
+<meta name="description" content="Satu aplikasi untuk berita, TV, radio, dan CCTV dari seluruh Indonesia, ditambah cuaca dan gempa dari BMKG.">
+<meta name="theme-color" content="#EEF1F4" id="metaTheme">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 70'%3E%3Crect width='10' height='70' fill='%23fff'/%3E%3Crect x='10' width='10' height='70' fill='%23F2B100'/%3E%3Crect x='20' width='10' height='70' fill='%2319B6C4'/%3E%3Crect x='30' width='10' height='70' fill='%231FA24A'/%3E%3Crect x='40' width='10' height='70' fill='%23D6389A'/%3E%3Crect x='50' width='10' height='70' fill='%23D8232A'/%3E%3Crect x='60' width='10' height='70' fill='%231F5FBF'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<style>
+:root{
+  --paper:#EEF1F4; --card:#FFFFFF; --ink:#0E1B2C; --ink2:#53637A; --line:#D7DDE5;
+  --red:#D8232A; --green:#0B6B4F; --amber:#F2B100; --blue:#1F5FBF; --soft:#E3E8EE;
+  --wx-bg:#12263F; --wx-fg:#F2F6FB;
+  --bars:linear-gradient(90deg,#fff 0 14.28%,#F2B100 0 28.57%,#19B6C4 0 42.85%,#1FA24A 0 57.14%,#D6389A 0 71.42%,#D8232A 0 85.71%,#1F5FBF 0);
+  --display:"Bricolage Grotesque","Public Sans",system-ui,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --navh:64px;
+}
+:root[data-theme="dark"]{
+  --paper:#0A121C; --card:#121D2B; --ink:#EAF0F7; --ink2:#9BAABD; --line:#223145; --soft:#1A2838;
+  --wx-bg:#17324F;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font:16px/1.5 var(--body);background:var(--paper);color:var(--ink);min-height:100dvh;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+h1,h2,h3{font-family:var(--display);line-height:1.15;letter-spacing:-.01em}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* kerangka */
+.app{min-height:100dvh}
+.top{position:sticky;top:0;z-index:30;background:var(--paper)}
+.top-in{display:flex;align-items:center;gap:10px;padding:10px 16px;max-width:1120px;margin:auto}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.02em;margin-right:auto}
+.mark{width:26px;height:26px;border-radius:7px;background:var(--bars);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.region{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);padding:7px 12px 7px 10px;border-radius:999px;font-weight:600;font-size:14px;max-width:46vw}
+.region span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.round{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line)}
+.strip{height:4px;background:var(--bars)}
+main{max-width:1120px;margin:auto;padding:14px 16px 190px}
+.tabs{position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tab{display:grid;justify-items:center;gap:2px;padding:9px 0 8px;font-size:12px;font-weight:600;color:var(--ink2);position:relative}
+.tab[aria-current="page"]{color:var(--ink)}
+.tab[aria-current="page"]::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--red)}
+.offline{background:var(--amber);color:#2b2000;text-align:center;font-weight:600;font-size:14px;padding:6px 12px}
+
+/* komponen umum */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px;color:var(--ink2)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 12px;margin:2px 0 10px;color:var(--ink2)}
+.search input{flex:1;min-width:0;border:0;background:none;padding:12px 0;font:inherit;color:var(--ink);outline:none}
+.search:focus-within{border-color:var(--blue)}
+.sect-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:24px 0 10px}
+.sect-h h2{font-size:21px}
+.link{font-weight:600;font-size:14px;color:var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:12px;font-weight:600;font-size:15px;background:var(--ink);color:var(--paper)}
+.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:8px 12px;font-size:14px}
+.note{font-size:14px;color:var(--ink2);margin:4px 0 12px}
+.empty{padding:28px 16px;text-align:center;color:var(--ink2);border:1px dashed var(--line);border-radius:16px}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.empty .btn{margin-top:12px}
+.skel{border-radius:12px;background:linear-gradient(100deg,var(--soft) 30%,var(--card) 50%,var(--soft) 70%);background-size:200% 100%;animation:sk 1.3s linear infinite}
+@keyframes sk{to{background-position:-200% 0}}
+
+/* beranda */
+.hello h1{font-size:30px;font-weight:800}
+.hello p{color:var(--ink2);margin-top:2px}
+.wx{margin-top:16px;background:var(--wx-bg);color:var(--wx-fg);border-radius:20px;padding:18px}
+.wx-main{display:flex;align-items:center;gap:14px}
+.wx-t{font-family:var(--display);font-size:56px;font-weight:800;line-height:1}
+.wx-e{font-size:44px;line-height:1}
+.wx-d{opacity:.85;font-size:14px}
+.wx-days{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.wx-day{background:rgba(255,255,255,.09);border-radius:12px;padding:10px;font-size:13px}
+.wx-day b{display:block;font-size:14px}
+.wx-strip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin-top:4px}
+.wx-strip::-webkit-scrollbar{display:none}
+.wx-city{flex:none;min-width:104px;background:rgba(255,255,255,.09);border-radius:14px;padding:10px 12px}
+.wx-city b{display:block;font-size:14px}
+.wx-city .t{font-family:var(--display);font-size:26px;font-weight:800}
+.wx h3{font-size:15px;opacity:.9;margin-bottom:10px;font-family:var(--body);font-weight:600}
+.quake{margin-top:12px;display:grid;grid-template-columns:auto 1fr;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.q-mag{background:var(--red);color:#fff;display:grid;place-items:center;padding:12px 18px;text-align:center}
+.q-mag b{font-family:var(--display);font-size:38px;font-weight:800;line-height:1}
+.q-mag span{font-size:12px;font-weight:600}
+.q-body{padding:12px 14px;display:grid;gap:3px}
+.q-body b{font-size:16px;line-height:1.3}
+.q-body small{color:var(--ink2);font-size:13px}
+.q-more{grid-column:1/-1;border-top:1px solid var(--line);padding:10px 14px;font-size:14px}
+.q-more summary{cursor:pointer;font-weight:600;color:var(--blue)}
+.q-item{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.q-item:last-child{border:0}
+.launch{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.lt{display:grid;gap:6px;justify-items:start;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);text-align:left}
+.lt b{font-family:var(--display);font-size:17px}
+.lt small{color:var(--ink2);font-size:13px;line-height:1.3}
+.lt .ic{width:26px;height:26px}
+.lt.tvc .ic{color:var(--red)}.lt.rdc .ic{color:var(--green)}.lt.cmc .ic{color:var(--blue)}
+.resume{display:grid;gap:10px}
+.foot{margin-top:28px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.foot a{color:var(--blue);font-weight:600}
+
+/* berita */
+.lead{display:block;position:relative;border-radius:20px;overflow:hidden;aspect-ratio:16/9;background:var(--soft);margin-bottom:4px}
+.lead img{width:100%;height:100%;object-fit:cover}
+.lead .ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:16px;color:#fff;background:linear-gradient(to top,rgba(5,12,22,.88),rgba(5,12,22,.05) 70%)}
+.lead.noimg .ov{background:none}
+.lead h3{font-size:22px;font-weight:800;text-wrap:balance}
+.meta{font-size:13px;color:var(--ink2);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lead .meta{color:rgba(255,255,255,.85)}
+.src{font-weight:700;color:var(--ink)}
+.lead .src{color:#fff}
+.row{display:grid;grid-template-columns:1fr auto;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+.row h3{font-family:var(--body);font-size:16px;font-weight:600;line-height:1.38;margin:3px 0 4px}
+.row p{font-size:14px;color:var(--ink2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row .th{width:96px;height:72px;border-radius:10px;object-fit:cover;background:var(--soft)}
+.news-grid{display:grid;gap:0 28px}
+
+/* TV */
+.tv-layout{display:grid;gap:14px}
+.stage{position:sticky;top:60px;z-index:10;background:var(--paper);padding-bottom:6px}
+.screen{position:relative;aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden}
+.screen video,.screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.nosig{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;padding:14px;color:#fff;
+  background:linear-gradient(90deg,#c9c9c9 0 14.28%,#c9c900 0 28.57%,#00c9c9 0 42.85%,#00c900 0 57.14%,#c900c9 0 71.42%,#c90000 0 85.71%,#0000c9 0)}
+.nosig::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;background:#0c0c10}
+.nosig p{position:relative;z-index:1;font-family:var(--display);font-weight:800;font-size:clamp(15px,3.6vw,22px);line-height:1.2;max-width:26ch;text-wrap:balance}
+.nosig[data-k="load"] p::after{content:"";display:inline-block;width:.5em;height:.5em;margin-left:.4em;border-radius:50%;background:var(--amber);animation:bl 1s steps(2) infinite}
+@keyframes bl{50%{opacity:0}}
+.now{display:flex;align-items:center;gap:10px;padding:10px 2px 0}
+.now div:first-child{flex:1;min-width:0}
+.now b{display:block;font-family:var(--display);font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now span{font-size:13px;color:var(--ink2)}
+.tools{display:flex;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:10px}
+.tile{display:grid;gap:8px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px;position:relative}
+.tile .logo{aspect-ratio:16/10;display:grid;place-items:center;background:#fff;border-radius:8px;overflow:hidden}
+.tile .logo img{max-width:78%;max-height:72%;object-fit:contain}
+.ini{display:grid;place-items:center;width:100%;height:100%;color:#fff;font-family:var(--display);font-weight:800;font-size:22px}
+.tile b{font-size:14px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tile small{color:var(--ink2);font-size:12px}
+.tile.on{outline:2px solid var(--red);outline-offset:1px}
+.tile.bad{opacity:.5}
+.fav{position:absolute;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.94);color:#444;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.fav .ic{width:16px;height:16px}
+.fav.is{color:var(--amber)}
+.fav.is .ic{fill:var(--amber)}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--soft);color:var(--ink2)}
+.tag.warn{background:#fff1c2;color:#6b4b00}
+
+/* radio */
+.rlist{display:grid;gap:0}
+.rrow{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);text-align:left;width:100%}
+.rlogo{width:52px;height:52px;border-radius:12px;overflow:hidden;background:var(--soft);display:grid;place-items:center}
+.rlogo img{width:100%;height:100%;object-fit:cover}
+.rrow b{display:block;font-size:16px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rrow small{color:var(--ink2);font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rrow .rt{min-width:0}
+.pbtn{width:44px;height:44px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center}
+.rrow.on .pbtn{background:var(--red)}
+.favb{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--ink2)}
+.favb.is{color:var(--amber)}
+.favb.is .ic{fill:var(--amber)}
+.rr-act{display:flex;align-items:center;gap:4px}
+.mini{position:fixed;z-index:45;left:10px;right:10px;bottom:calc(var(--navh) + env(safe-area-inset-bottom) + 8px);display:flex;align-items:center;gap:12px;background:var(--ink);color:var(--paper);border-radius:16px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+.mini .rlogo{width:42px;height:42px;background:rgba(255,255,255,.14)}
+.mini div.t{flex:1;min-width:0}
+.mini b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini small{font-size:12.5px;opacity:.8}
+.mini .mb{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16)}
+.mini .mb.main{background:var(--red);color:#fff}
+.eq{display:inline-flex;gap:2px;align-items:flex-end;height:10px;margin-right:6px}
+.eq i{width:3px;background:currentColor;animation:eq 0.9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}
+@keyframes eq{0%,100%{height:3px}50%{height:10px}}
+
+/* CCTV */
+.cams{display:grid;gap:10px}
+.cam{display:grid;gap:8px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:6px 16px 16px 6px;padding:14px}
+.cam.tol{border-left-color:var(--amber)}
+.cam.kota{border-left-color:var(--green)}
+.cam.cust{border-left-color:var(--red)}
+.cam h3{font-size:18px}
+.cam p{font-size:14px;color:var(--ink2)}
+.cam-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.cam-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+
+/* dialog */
+dialog{border:0;border-radius:20px;padding:0;background:var(--card);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+dialog::backdrop{background:rgba(5,12,22,.6)}
+.sheet{padding:18px;display:grid;gap:12px;max-height:calc(100dvh - 40px);overflow:auto}
+.sheet h2{font-size:22px}
+.sh-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.plist{display:grid;gap:2px;max-height:56dvh;overflow:auto}
+.pitem{text-align:left;padding:11px 12px;border-radius:10px;display:flex;justify-content:space-between;gap:10px}
+.pitem:hover,.pitem[aria-current="true"]{background:var(--soft)}
+.pitem small{color:var(--ink2)}
+.field{display:grid;gap:5px}
+.field label{font-weight:600;font-size:14px}
+.field input,.field select{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit}
+.vbody{position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
+.vbody video,.vbody iframe,.vbody img{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:#000}
+.toast{position:fixed;z-index:80;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + env(safe-area-inset-bottom) + 84px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:calc(100vw - 32px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+
+@media (min-width:700px){
+  .news-grid{grid-template-columns:1fr 1fr}
+  .resume{grid-template-columns:1fr 1fr}
+}
+@media (min-width:900px){
+  :root{--navh:0px}
+  .app{padding-left:96px}
+  .tabs{top:0;bottom:0;right:auto;width:96px;grid-template-columns:1fr;grid-auto-rows:78px;align-content:start;padding:92px 0 0;border-top:0;border-right:1px solid var(--line)}
+  .tab[aria-current="page"]::before{top:18px;bottom:18px;left:0;right:auto;width:3px;height:auto;border-radius:0 3px 3px 0}
+  .tab{align-content:center}
+  main{padding-bottom:120px}
+  .mini{left:116px;right:auto;bottom:18px;width:460px}
+  .toast{bottom:100px}
+  .tv-layout{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:start;gap:22px}
+  .stage{top:76px}
+  .tv-layout .grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
+  .launch .lt{padding:18px}
+  .hello h1{font-size:38px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="i-news" viewBox="0 0 24 24"><path d="M4 4h13v16H6a2 2 0 0 1-2-2z"/><path d="M17 8h3v10a2 2 0 0 1-2 2"/><path d="M8 8h5M8 12h5M8 16h3"/></symbol>
+<symbol id="i-tv" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 3l4 4 4-4"/></symbol>
+<symbol id="i-radio" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8l10-5"/><circle cx="8.5" cy="14" r="2.5"/><path d="M14 12.5h4M14 16h4"/></symbol>
+<symbol id="i-cam" viewBox="0 0 24 24"><path d="M3 7h12a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3z"/><path d="M17 11l4-2.5v7L17 13"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z" fill="currentColor"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3.2"/></symbol>
+<symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+</defs></svg>
+
+<div class="app">
+  <header class="top">
+    <div class="top-in">
+      <div class="brand"><span class="mark" aria-hidden="true"></span>Mantam Info</div>
+      <button class="region" data-act="region-open" aria-label="Pilih wilayah"><svg class="ic"><use href="#i-pin"/></svg><span id="regionName">Seluruh Indonesia</span></button>
+      <button class="round" data-act="theme" aria-label="Ganti tema"><svg class="ic"><use id="themeUse" href="#i-moon"/></svg></button>
+    </div>
+    <div class="strip" aria-hidden="true"></div>
+    <div class="offline" id="offline" hidden>Tidak ada koneksi internet. Siaran dan berita belum bisa dimuat.</div>
+  </header>
+
+  <main id="main">
+    <!-- BERANDA -->
+    <section id="view-home" data-view="home">
+      <div class="hello"><h1 id="helloTitle">Selamat datang</h1><p id="helloDate"></p></div>
+      <div class="wx" id="wxBox"><div class="skel" style="height:96px;opacity:.25"></div></div>
+      <div id="quakeBox"></div>
+
+      <div class="sect-h"><h2>Berita utama</h2><button class="link" data-act="tab" data-tab="berita">Semua berita</button></div>
+      <div id="homeNews"></div>
+
+      <div class="sect-h"><h2>Mau lihat apa?</h2></div>
+      <div class="launch">
+        <button class="lt tvc" data-act="tab" data-tab="tv"><svg class="ic"><use href="#i-tv"/></svg><b>TV</b><small>Siaran langsung nasional dan daerah</small></button>
+        <button class="lt rdc" data-act="tab" data-tab="radio"><svg class="ic"><use href="#i-radio"/></svg><b>Radio</b><small>Stasiun dari seluruh Indonesia</small></button>
+        <button class="lt cmc" data-act="tab" data-tab="cctv"><svg class="ic"><use href="#i-cam"/></svg><b>CCTV</b><small>Pantau jalan dan tol</small></button>
+      </div>
+      <div id="resumeWrap" hidden>
+        <div class="sect-h"><h2>Lanjutkan</h2></div>
+        <div class="resume" id="resume"></div>
+      </div>
+      <p class="foot">Cuaca dari Open-Meteo. Gempa bumi: sumber BMKG (Badan Meteorologi, Klimatologi, dan Geofisika). Berita dari ANTARA, detikcom, CNN Indonesia, Tempo, Republika, Suara.com, dan Google Berita; hak cipta tetap milik masing-masing penerbit. Daftar TV dari proyek <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org</a>, daftar radio dari <a href="https://www.radio-browser.info" target="_blank" rel="noopener">Radio Browser</a>.</p>
+    </section>
+
+    <!-- BERITA -->
+    <section id="view-berita" data-view="berita" hidden>
+      <div class="sect-h" style="margin-top:6px"><h2 id="newsTitle">Berita</h2><button class="link" data-act="news-refresh" style="display:flex;gap:6px;align-items:center"><svg class="ic" style="width:16px;height:16px"><use href="#i-refresh"/></svg>Muat ulang</button></div>
+      <div class="chips" id="newsCats" role="group" aria-label="Kategori berita"></div>
+      <label class="search"><svg class="ic"><use href="#i-search"/></svg><span class="sr">Cari berita</span><input id="newsQ" type="search" placeholder="Cari judul berita" autocomplete="off"></label>
+      <div id="newsBox"></div>
+    </section>
+
+    <!-- TV -->
+    <section id="view-tv" data-view="tv" hidden>
+      <div class="tv-layout">
+        <div class="stage" id="tvStage">
+          <div class="screen">
+            <video id="tvVideo" controls playsinline></video>
+            <iframe id="tvFrame" hidden allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer" title="Siaran TV"></iframe>
+            <div class="nosig" id="tvNoSig" data-k=""><p id="tvMsg">Pilih kanal di bawah untuk mulai menonton.</p></div>
+          </div>
+          <div class="now">
+            <div><b id="tvName">Belum ada kanal</b><span id="tvMeta">Siaran langsung</span></div>
+            <div class="tools">
+              <button class="favb" id="tvFav" data-act="tv-fav-cur" aria-label="Tandai favorit" hidden><svg class="ic"><use href="#i-star"/></svg></button>
+              <a class="btn alt sm" id="tvOpen" target="_blank" rel="noopener" hidden>Buka<svg class="ic" style="width:16px;height:16px"><use href="#i-ext"/></svg></a>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="search"><svg class="ic"><use href="#i-search"/></svg><span class="sr">Cari kanal TV</span><input id="tvQ" type="search" placeholder="Cari kanal TV" autocomplete="off"></label>
+          <div class="chips" id="tvChips" role="group" aria-label="Filter kanal"></div>
+          <p class="note" id="tvNote"></p>
+          <div class="grid" id="tvGrid"></div>
+          <div style="text-align:center;margin-top:14px" id="tvMore"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RADIO -->
+    <section id="view-radio" data-view="radio" hidden>
+      <label class="search"><svg class="ic"><use href="#i-search"/></svg><span class="sr">Cari stasiun radio</span><input id="rdQ" type="search" placeholder="Cari stasiun, kota, atau genre" autocomplete="off"></label>
+      <div class="chips" id="rdChips" role="group" aria-label="Filter radio"></div>
+      <p class="note" id="rdNote"></p>
+      <div class="rlist" id="rdList"></div>
+      <div style="text-align:center;margin-top:14px" id="rdMore"></div>
+    </section>
+
+    <!-- CCTV -->
+    <section id="view-cctv" data-view="cctv" hidden>
+      <p class="note" style="margin-top:0">Kamera milik pemerintah dan operator jalan. Hampir semua portal melarang ditampilkan di aplikasi lain, jadi tombol utama membuka portalnya di tab baru.</p>
+      <div class="chips" id="cmChips" role="group" aria-label="Filter CCTV"></div>
+      <div class="cams" id="cmList"></div>
+    </section>
+  </main>
+
+  <div class="mini" id="mini" hidden>
+    <div class="rlogo" id="miniLogo"></div>
+    <div class="t"><b id="miniName">—</b><small id="miniState"></small></div>
+    <button class="mb main" id="miniPlay" data-act="mini-toggle" aria-label="Putar atau jeda"><svg class="ic"><use id="miniUse" href="#i-pause"/></svg></button>
+    <button class="mb" data-act="mini-stop" aria-label="Hentikan radio"><svg class="ic"><use href="#i-x"/></svg></button>
+  </div>
+
+  <nav class="tabs" aria-label="Menu utama">
+    <button class="tab" data-act="tab" data-tab="home"><svg class="ic"><use href="#i-home"/></svg>Beranda</button>
+    <button class="tab" data-act="tab" data-tab="berita"><svg class="ic"><use href="#i-news"/></svg>Berita</button>
+    <button class="tab" data-act="tab" data-tab="tv"><svg class="ic"><use href="#i-tv"/></svg>TV</button>
+    <button class="tab" data-act="tab" data-tab="radio"><svg class="ic"><use href="#i-radio"/></svg>Radio</button>
+    <button class="tab" data-act="tab" data-tab="cctv"><svg class="ic"><use href="#i-cam"/></svg>CCTV</button>
+  </nav>
+</div>
+
+<audio id="aud" preload="none"></audio>
+
+<dialog id="regionDlg"><div class="sheet">
+  <div class="sh-h"><h2>Pilih wilayah</h2><button class="round" data-act="close-dlg" aria-label="Tutup"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <label class="search"><svg class="ic"><use href="#i-search"/></svg><span class="sr">Cari provinsi</span><input id="regQ" type="search" placeholder="Cari provinsi atau kota" autocomplete="off"></label>
+  <div class="plist" id="regList"></div>
+</div></dialog>
+
+<dialog id="addDlg"><form class="sheet" id="addForm" method="dialog">
+  <div class="sh-h"><h2 id="addTitle">Tambah sumber</h2><button type="button" class="round" data-act="close-dlg" aria-label="Tutup"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <p class="note" id="addHint"></p>
+  <div class="field"><label for="addName">Nama</label><input id="addName" required maxlength="60" placeholder="Contoh: TV Lokal Kotaku"></div>
+  <div class="field"><label for="addUrl">Alamat (URL)</label><input id="addUrl" required type="url" inputmode="url" placeholder="https://…"></div>
+  <button class="btn" type="submit">Simpan</button>
+</form></dialog>
+
+<dialog id="viewDlg"><div class="sheet">
+  <div class="sh-h"><h2 id="viewTitle" style="font-size:19px">Kamera</h2><button class="round" data-act="close-view" aria-label="Tutup"><svg class="ic"><use href="#i-x"/></svg></button></div>
+  <div class="vbody" id="viewBody"></div>
+  <p class="note" id="viewHint"></p>
+  <a class="btn" id="viewOpen" target="_blank" rel="noopener">Buka di tab baru<svg class="ic" style="width:18px;height:18px"><use href="#i-ext"/></svg></a>
+</div></dialog>
+
+<div class="toast" id="toast" hidden role="status"></div>
+<noscript><p style="padding:24px">Mantam Info membutuhkan JavaScript untuk berjalan.</p></noscript>
+
+<script>
+(()=>{
+'use strict';
+
+/* ---------- util ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic=(n,s)=>'<svg class="ic"'+(s?' style="'+s+'"':'')+'><use href="#i-'+n+'"/></svg>';
+const hash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36)};
+const ini=n=>String(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const hue=n=>'hsl('+(parseInt(hash(String(n)),36)%360)+' 42% 36%)';
+const safeUrl=u=>{try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:''}catch{return ''}};
+const store={
+  get(k,d){try{const v=localStorage.getItem('mi:'+k);return v==null?d:JSON.parse(v)}catch{return d}},
+  set(k,v){try{localStorage.setItem('mi:'+k,JSON.stringify(v))}catch{}}
+};
+const sess={
+  get(k,d){try{const v=sessionStorage.getItem('mi:'+k);return v==null?d:JSON.parse(v)}catch{return d}},
+  set(k,v){try{sessionStorage.setItem('mi:'+k,JSON.stringify(v))}catch{}}
+};
+const mixed=u=>location.protocol==='https:'&&/^http:/i.test(u);
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3200)}
+function ago(d){
+  if(!d||isNaN(d))return '';
+  const s=(Date.now()-d.getTime())/1000;
+  if(s<90)return 'baru saja';
+  const m=s/60; if(m<60)return Math.floor(m)+' menit lalu';
+  const h=m/60; if(h<24)return Math.floor(h)+' jam lalu';
+  const dd=h/24; if(dd<7)return Math.floor(dd)+' hari lalu';
+  return d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+}
+async function fetchTimeout(url,opts,ms){
+  const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||9000);
+  try{return await fetch(url,Object.assign({},opts,{signal:c.signal}))}finally{clearTimeout(t)}
+}
+const PROXIES=[
+  u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
+  u=>'https://corsproxy.io/?'+encodeURIComponent(u),
+  u=>'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u)
+];
+const noCors=new Set();
+let proxyOrder=PROXIES.map((_,i)=>i);
+async function fetchText(url){
+  // coba langsung dulu; bila diblokir CORS, lewat perantara
+  let host='';try{host=new URL(url).host}catch{}
+  if(host&&!noCors.has(host)){
+    try{
+      const r=await fetchTimeout(url,{},7000);
+      if(r.ok){const t=await r.text();if(t&&t.length>40)return t}
+    }catch{noCors.add(host)}
+  }
+  for(const i of proxyOrder){
+    try{
+      const r=await fetchTimeout(PROXIES[i](url),{},11000);
+      if(!r.ok)continue;
+      const t=await r.text();
+      if(t&&t.length>40){proxyOrder=[i,...proxyOrder.filter(x=>x!==i)];return t}
+    }catch{}
+  }
+  throw new Error('fetch');
+}
+window.__fb=function(img){
+  const n=img.getAttribute('data-n')||'',p=img.parentNode;
+  if(p)p.innerHTML='<span class="ini" style="background:'+hue(n)+'">'+esc(ini(n))+'</span>';
+};
+
+/* ---------- data wilayah ---------- */
+const PROVS=[
+['aceh','Aceh','Banda Aceh',5.55,95.32,'aceh',['aceh']],
+['sumut','Sumatera Utara','Medan',3.59,98.67,'sumut',['sumut','sumatera utara','medan']],
+['sumbar','Sumatera Barat','Padang',-0.95,100.35,'sumbar',['sumbar','sumatera barat','padang','minang']],
+['riau','Riau','Pekanbaru',0.51,101.45,'riau',['riau','pekanbaru']],
+['kepri','Kepulauan Riau','Tanjungpinang',0.92,104.45,'kepri',['kepri','kepulauan riau','batam','tanjungpinang']],
+['jambi','Jambi','Jambi',-1.61,103.61,'jambi',['jambi']],
+['sumsel','Sumatera Selatan','Palembang',-2.98,104.76,'sumsel',['sumsel','sumatera selatan','palembang','sriwijaya']],
+['babel','Kepulauan Bangka Belitung','Pangkalpinang',-2.13,106.11,'babel',['bangka','belitung','babel','pangkalpinang']],
+['bengkulu','Bengkulu','Bengkulu',-3.80,102.26,'bengkulu',['bengkulu']],
+['lampung','Lampung','Bandar Lampung',-5.43,105.26,'lampung',['lampung']],
+['jakarta','DKI Jakarta','Jakarta',-6.21,106.85,'megapolitan',['jakarta','dki','jaktv','betawi']],
+['banten','Banten','Serang',-6.12,106.15,'banten',['banten','serang','tangerang','cilegon']],
+['jabar','Jawa Barat','Bandung',-6.91,107.61,'jabar',['jabar','jawa barat','bandung','bogor','bekasi','depok','cirebon','sunda','parahyangan']],
+['jateng','Jawa Tengah','Semarang',-6.97,110.42,'jateng',['jateng','jawa tengah','semarang','solo','surakarta','tegal','magelang']],
+['diy','DI Yogyakarta','Yogyakarta',-7.80,110.36,'yogyakarta',['yogya','jogja','diy']],
+['jatim','Jawa Timur','Surabaya',-7.25,112.75,'jatim',['jatim','jawa timur','surabaya','malang','jtv','madura','kediri']],
+['bali','Bali','Denpasar',-8.65,115.22,'bali',['bali','denpasar']],
+['ntb','Nusa Tenggara Barat','Mataram',-8.58,116.12,'ntb',['ntb','nusa tenggara barat','mataram','lombok','sumbawa']],
+['ntt','Nusa Tenggara Timur','Kupang',-10.18,123.61,'ntt',['ntt','nusa tenggara timur','kupang','flores']],
+['kalbar','Kalimantan Barat','Pontianak',-0.03,109.33,'kalbar',['kalbar','kalimantan barat','pontianak']],
+['kalteng','Kalimantan Tengah','Palangka Raya',-2.21,113.92,'kalteng',['kalteng','kalimantan tengah','palangka']],
+['kalsel','Kalimantan Selatan','Banjarmasin',-3.32,114.59,'kalsel',['kalsel','kalimantan selatan','banjar']],
+['kaltim','Kalimantan Timur','Samarinda',-0.50,117.15,'kaltim',['kaltim','kalimantan timur','samarinda','balikpapan']],
+['kaltara','Kalimantan Utara','Tanjung Selor',2.84,117.37,'kaltara',['kaltara','kalimantan utara','tarakan']],
+['sulut','Sulawesi Utara','Manado',1.47,124.84,'sulut',['sulut','sulawesi utara','manado']],
+['gorontalo','Gorontalo','Gorontalo',0.54,123.06,'gorontalo',['gorontalo']],
+['sulteng','Sulawesi Tengah','Palu',-0.90,119.87,'sulteng',['sulteng','sulawesi tengah','palu']],
+['sulbar','Sulawesi Barat','Mamuju',-2.68,118.89,'sulbar',['sulbar','sulawesi barat','mamuju']],
+['sulsel','Sulawesi Selatan','Makassar',-5.15,119.43,'sulsel',['sulsel','sulawesi selatan','makassar','bugis']],
+['sultra','Sulawesi Tenggara','Kendari',-3.97,122.51,'sultra',['sultra','sulawesi tenggara','kendari']],
+['maluku','Maluku','Ambon',-3.70,128.18,'ambon',['maluku','ambon']],
+['malut','Maluku Utara','Sofifi',0.74,127.57,'malut',['maluku utara','malut','ternate','sofifi']],
+['pabar','Papua Barat','Manokwari',-0.86,134.06,'papuabarat',['papua barat','manokwari']],
+['pabarda','Papua Barat Daya','Sorong',-0.88,131.26,null,['sorong','papua barat daya']],
+['papua','Papua','Jayapura',-2.53,140.72,'papua',['papua','jayapura']],
+['patengah','Papua Tengah','Nabire',-3.37,135.48,null,['papua tengah','nabire','timika']],
+['papeg','Papua Pegunungan','Wamena',-4.10,138.94,null,['papua pegunungan','wamena']],
+['pasel','Papua Selatan','Merauke',-8.50,140.40,null,['papua selatan','merauke']]
+].map(a=>({id:a[0],n:a[1],cap:a[2],lat:a[3],lon:a[4],ant:a[5],kw:a[6]}));
+const P=Object.fromEntries(PROVS.map(p=>[p.id,p]));
+const BIG=[['Jakarta',-6.21,106.85],['Surabaya',-7.25,112.75],['Medan',3.59,98.67],['Makassar',-5.15,119.43],['Denpasar',-8.65,115.22],['Jayapura',-2.53,140.72]].map(a=>({n:a[0],lat:a[1],lon:a[2]}));
+
+/* ---------- state ---------- */
+const st={
+  region:store.get('region','all'),
+  theme:store.get('theme',null),
+  fav:Object.assign({tv:[],radio:[],cctv:[]},store.get('fav',{})),
+  custom:Object.assign({tv:[],radio:[],cctv:[]},store.get('custom',{})),
+  last:store.get('last',{})
+};
+const prov=()=>P[st.region]||null;
+const regionLabel=()=>prov()?prov().n:'Seluruh Indonesia';
+const saveFav=()=>store.set('fav',st.fav);
+const saveCustom=()=>store.set('custom',st.custom);
+function matchRegion(text){
+  const p=prov();if(!p)return false;
+  if(!p.re)p.re=p.kw.map(k=>new RegExp('(^|[^a-z])'+k+'($|[^a-z])'));
+  const t=String(text||'').toLowerCase();
+  return p.re.some(r=>r.test(t));
+}
+function toggleFav(type,id){
+  const a=st.fav[type];const i=a.indexOf(id);
+  if(i>=0)a.splice(i,1);else a.push(id);
+  saveFav();
+}
+
+/* ---------- tema ---------- */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  $('#themeUse').setAttribute('href',t==='dark'?'#i-sun':'#i-moon');
+  $('#metaTheme').setAttribute('content',t==='dark'?'#0A121C':'#EEF1F4');
+}
+applyTheme(st.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+
+/* ---------- navigasi ---------- */
+const TABS=['home','berita','tv','radio','cctv'];
+let curTab='home';
+function show(tab,push){
+  if(!TABS.includes(tab))tab='home';
+  curTab=tab;
+  $$('[data-view]').forEach(s=>s.hidden=s.dataset.view!==tab);
+  $$('.tab').forEach(b=>{if(b.dataset.tab===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  if(push!==false&&location.hash!=='#'+tab){try{history.pushState(null,'','#'+tab)}catch{}}
+  window.scrollTo(0,0);
+  if(tab==='home')loadHome();
+  if(tab==='berita')loadNewsView();
+  if(tab==='tv')loadTV();
+  if(tab==='radio')loadRadio();
+  if(tab==='cctv')renderCCTV();
+}
+window.addEventListener('popstate',()=>show((location.hash||'#home').slice(1),false));
+window.addEventListener('online',()=>$('#offline').hidden=true);
+window.addEventListener('offline',()=>$('#offline').hidden=false);
+if(!navigator.onLine)$('#offline').hidden=false;
+
+/* ---------- RSS ---------- */
+const gnews=q=>'https://news.google.com/rss/search?q='+encodeURIComponent(q)+'&hl=id&gl=ID&ceid=ID:id';
+const NAT=[
+  {name:'ANTARA',url:'https://www.antaranews.com/rss/terkini.xml'},
+  {name:'detikcom',url:'https://rss.detik.com/index.php/detikcom'},
+  {name:'CNN Indonesia',url:'https://www.cnnindonesia.com/nasional/rss'},
+  {name:'Tempo',url:'https://rss.tempo.co/nasional'},
+  {name:'Republika',url:'https://www.republika.co.id/rss'},
+  {name:'Suara.com',url:'https://www.suara.com/rss'},
+  {name:'Berita terbaru',url:gnews('berita Indonesia when:1d'),gn:true}
+];
+const CATS=[
+  {id:'terbaru',n:'Terbaru'},
+  {id:'politik',n:'Politik',ant:'politik',q:'politik pemerintah'},
+  {id:'hukum',n:'Hukum',ant:'hukum',q:'hukum kriminal'},
+  {id:'ekonomi',n:'Ekonomi',ant:'ekonomi',q:'ekonomi bisnis'},
+  {id:'olahraga',n:'Olahraga',ant:'olahraga',q:'olahraga'},
+  {id:'tekno',n:'Teknologi',ant:'tekno',q:'teknologi'},
+  {id:'hiburan',n:'Hiburan',ant:'hiburan',q:'hiburan selebriti'},
+  {id:'kesehatan',n:'Kesehatan',q:'kesehatan'},
+  {id:'dunia',n:'Dunia',ant:'dunia',q:'berita dunia internasional'}
+];
+function feedsFor(regionId,catId){
+  const p=P[regionId]||null;
+  const c=CATS.find(x=>x.id===catId)||CATS[0];
+  if(!p){
+    if(c.id==='terbaru')return NAT;
+    const f=[{name:'Berita '+c.n,url:gnews(c.q+' Indonesia when:3d'),gn:true}];
+    if(c.ant)f.unshift({name:'ANTARA',url:'https://www.antaranews.com/rss/'+c.ant+'.xml'});
+    return f;
+  }
+  const f=[];
+  if(p.ant)f.push({name:'ANTARA '+p.n,url:'https://'+p.ant+'.antaranews.com/rss/terkini.xml'});
+  f.push({name:p.n,url:gnews(p.n+(c.q?' '+c.q:'')+' when:7d'),gn:true});
+  if(c.id==='terbaru')f.push({name:p.cap,url:gnews(p.cap+' when:3d'),gn:true});
+  return f;
+}
+const dom=new DOMParser();
+const txt=(el,tag)=>{const n=el.getElementsByTagName(tag)[0];return n?(n.textContent||'').trim():''};
+function parseRSS(xml,srcName,isGn){
+  const doc=dom.parseFromString(xml,'text/xml');
+  if(doc.getElementsByTagName('parsererror').length)throw new Error('xml');
+  const nodes=[...doc.getElementsByTagName('item'),...doc.getElementsByTagName('entry')];
+  return nodes.map(it=>{
+    let title=txt(it,'title');
+    let link=txt(it,'link');
+    if(!link){const l=it.getElementsByTagName('link')[0];link=l?(l.getAttribute('href')||''):''}
+    const dateS=txt(it,'pubDate')||txt(it,'published')||txt(it,'updated')||txt(it,'dc:date');
+    const date=dateS?new Date(dateS):null;
+    let src=srcName;
+    const s=it.getElementsByTagName('source')[0];
+    if(isGn&&s&&s.textContent){src=s.textContent.trim();title=title.replace(new RegExp('\\s+-\\s+'+src.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$'),'')}
+    const rawDesc=txt(it,'description')||txt(it,'summary')||txt(it,'content:encoded');
+    let img='';
+    const en=it.getElementsByTagName('enclosure')[0];
+    if(en&&/image/i.test(en.getAttribute('type')||'image'))img=en.getAttribute('url')||'';
+    if(!img){const m=it.getElementsByTagName('media:content')[0]||it.getElementsByTagName('media:thumbnail')[0];if(m)img=m.getAttribute('url')||''}
+    let desc='';
+    if(rawDesc&&!isGn){
+      const d=dom.parseFromString(rawDesc,'text/html');
+      if(!img){const im=d.querySelector('img');if(im)img=im.getAttribute('src')||''}
+      desc=(d.body.textContent||'').replace(/\s+/g,' ').trim().slice(0,170);
+    }
+    return {title,link:safeUrl(link),date:date&&!isNaN(date)?date:null,src,img:safeUrl(img),desc};
+  }).filter(x=>x.title&&x.link);
+}
+const feedCache=new Map();
+async function getFeed(f){
+  const c=feedCache.get(f.url);
+  if(c&&Date.now()-c.t<300000)return c.v;
+  const xml=await fetchText(f.url);
+  const v=parseRSS(xml,f.name,!!f.gn);
+  feedCache.set(f.url,{t:Date.now(),v});
+  return v;
+}
+const newsCache=new Map();
+async function getNews(regionId,catId,force){
+  const key=regionId+'|'+catId;
+  const c=newsCache.get(key);
+  if(!force&&c&&Date.now()-c.t<300000)return c.v;
+  const res=await Promise.allSettled(feedsFor(regionId,catId).map(f=>{if(force)feedCache.delete(f.url);return getFeed(f)}));
+  const ok=res.filter(r=>r.status==='fulfilled');
+  const seen=new Set();let items=[];
+  ok.forEach(r=>r.value.forEach(x=>{
+    const k=x.title.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,60);
+    if(seen.has(k))return;seen.add(k);items.push(x);
+  }));
+  items.sort((a,b)=>(b.date?b.date.getTime():0)-(a.date?a.date.getTime():0));
+  items=items.slice(0,90);
+  const v={items,failed:res.length-ok.length,total:res.length};
+  if(items.length)newsCache.set(key,{t:Date.now(),v});
+  return v;
+}
+
+/* ---------- Berita (tampilan) ---------- */
+const news={cat:'terbaru',q:'',data:null,loading:false};
+function leadHTML(x){
+  const t=esc(x.title);
+  return '<a class="lead'+(x.img?'':' noimg')+'" href="'+esc(x.link)+'" target="_blank" rel="noopener"'+(x.img?'':' style="background:'+hue(x.src)+'"')+'>'
+    +(x.img?'<img src="'+esc(x.img)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">':'')
+    +'<div class="ov"><div class="meta"><span class="src">'+esc(x.src)+'</span><span>'+esc(ago(x.date))+'</span></div><h3>'+t+'</h3></div></a>';
+}
+function rowHTML(x){
+  return '<a class="row" href="'+esc(x.link)+'" target="_blank" rel="noopener"><div>'
+    +'<div class="meta"><span class="src">'+esc(x.src)+'</span><span>'+esc(ago(x.date))+'</span></div>'
+    +'<h3>'+esc(x.title)+'</h3>'+(x.desc?'<p>'+esc(x.desc)+'</p>':'')+'</div>'
+    +(x.img?'<img class="th" src="'+esc(x.img)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">':'')
+    +'</a>';
+}
+const skelRows=n=>Array.from({length:n},()=>'<div class="skel" style="height:78px;margin:10px 0"></div>').join('');
+function renderNewsCats(){
+  $('#newsCats').innerHTML=CATS.map(c=>'<button class="chip" data-act="news-cat" data-id="'+c.id+'" aria-pressed="'+(news.cat===c.id)+'">'+esc(c.n)+'</button>').join('');
+  $('#newsTitle').textContent='Berita '+(prov()?prov().n:'Indonesia');
+}
+function renderNewsList(){
+  const box=$('#newsBox');
+  if(news.loading){box.innerHTML='<div class="skel" style="aspect-ratio:16/9;border-radius:20px"></div>'+skelRows(5);return}
+  const d=news.data;
+  if(!d||!d.items.length){
+    box.innerHTML='<div class="empty"><b>Berita belum bisa dimuat</b>Sumber berita tidak terjangkau saat ini. Periksa koneksi, lalu coba lagi.<br><button class="btn sm" data-act="news-refresh">Coba lagi</button></div>';
+    return;
+  }
+  const q=news.q.trim().toLowerCase();
+  let items=q?d.items.filter(x=>(x.title+' '+x.desc+' '+x.src).toLowerCase().includes(q)):d.items;
+  if(!items.length){box.innerHTML='<div class="empty"><b>Tidak ada hasil</b>Tidak ada berita yang cocok dengan “'+esc(news.q)+'”.</div>';return}
+  const lead=items[0],rest=items.slice(1);
+  box.innerHTML=(d.failed?'<p class="note">'+d.failed+' dari '+d.total+' sumber sedang tidak merespons; berita di bawah dari sumber lainnya.</p>':'')
+    +leadHTML(lead)+'<div class="news-grid">'+rest.map(rowHTML).join('')+'</div>';
+}
+async function loadNewsView(force){
+  renderNewsCats();
+  news.loading=true;renderNewsList();
+  try{news.data=await getNews(st.region,news.cat,force)}catch{news.data=null}
+  news.loading=false;renderNewsList();
+}
+
+/* ---------- Beranda ---------- */
+const WX=(c)=>{
+  const m={0:['Cerah','☀️'],1:['Cerah berawan','🌤️'],2:['Berawan sebagian','⛅'],3:['Berawan','☁️'],45:['Berkabut','🌫️'],48:['Berkabut','🌫️'],
+    51:['Gerimis ringan','🌦️'],53:['Gerimis','🌦️'],55:['Gerimis lebat','🌧️'],56:['Gerimis beku','🌧️'],57:['Gerimis beku','🌧️'],
+    61:['Hujan ringan','🌧️'],63:['Hujan sedang','🌧️'],65:['Hujan lebat','🌧️'],66:['Hujan beku','🌧️'],67:['Hujan beku','🌧️'],
+    80:['Hujan lokal','🌦️'],81:['Hujan lokal','🌧️'],82:['Hujan lebat lokal','⛈️'],95:['Badai petir','⛈️'],96:['Badai petir','⛈️'],99:['Badai petir','⛈️']};
+  return m[c]||(c>=71&&c<=77?['Berkabut','🌫️']:['Cuaca','🌡️']);
+};
+function greet(){
+  const h=new Date().getHours();
+  return h<11?'Selamat pagi':h<15?'Selamat siang':h<18?'Selamat sore':'Selamat malam';
+}
+async function loadWeather(){
+  const box=$('#wxBox');
+  const p=prov();
+  const list=p?[p]:BIG;
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+list.map(x=>x.lat).join(',')+'&longitude='+list.map(x=>x.lon).join(',')
+    +'&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m'
+    +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=3';
+  try{
+    const r=await fetchTimeout(url,{},9000);
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    const arr=Array.isArray(j)?j:[j];
+    if(p){
+      const d=arr[0],c=d.current,w=WX(c.weather_code);
+      const days=d.daily.time.map((t,i)=>{
+        const dn=i===0?'Hari ini':i===1?'Besok':new Date(t+'T12:00:00').toLocaleDateString('id-ID',{weekday:'long'});
+        const wd=WX(d.daily.weather_code[i]);
+        return '<div class="wx-day"><b>'+esc(dn)+'</b>'+wd[1]+' '+Math.round(d.daily.temperature_2m_max[i])+'° / '+Math.round(d.daily.temperature_2m_min[i])+'°<br>Hujan '+(d.daily.precipitation_probability_max[i]??'–')+'%</div>';
+      }).join('');
+      box.innerHTML='<h3>Cuaca di '+esc(p.cap)+'</h3><div class="wx-main"><div class="wx-e">'+w[1]+'</div><div><div class="wx-t">'+Math.round(c.temperature_2m)+'°</div><div class="wx-d">'+esc(w[0])+', terasa '+Math.round(c.apparent_temperature)+'°</div></div></div>'
+        +'<div class="wx-d" style="margin-top:8px">Kelembapan '+Math.round(c.relative_humidity_2m)+'%, angin '+Math.round(c.wind_speed_10m)+' km/jam</div><div class="wx-days">'+days+'</div>';
+    }else{
+      box.innerHTML='<h3>Cuaca kota-kota besar</h3><div class="wx-strip">'+arr.map((d,i)=>{
+        const w=WX(d.current.weather_code);
+        return '<div class="wx-city"><b>'+esc(BIG[i].n)+'</b><span class="t">'+Math.round(d.current.temperature_2m)+'°</span><div class="wx-d">'+w[1]+' '+esc(w[0])+'</div></div>';
+      }).join('')+'</div><div class="wx-d" style="margin-top:10px">Pilih wilayah di kanan atas untuk cuaca tiga hari.</div>';
+    }
+  }catch{
+    box.innerHTML='<h3>Cuaca</h3><div class="wx-d">Data cuaca belum bisa dimuat. Coba muat ulang halaman.</div>';
+  }
+}
+const BMKG='https://data.bmkg.go.id/DataMKG/TEWS/';
+async function loadQuake(){
+  const box=$('#quakeBox');
+  try{
+    const [a,b]=await Promise.allSettled([fetchText(BMKG+'autogempa.json').then(JSON.parse),fetchText(BMKG+'gempadirasakan.json').then(JSON.parse)]);
+    if(a.status!=='fulfilled')throw 0;
+    const g=a.value.Infogempa.gempa;
+    const felt=b.status==='fulfilled'?(b.value.Infogempa.gempa||[]).slice(0,8):[];
+    box.innerHTML='<div class="quake"><div class="q-mag"><div><b>'+esc(g.Magnitude)+'</b><br><span>magnitudo</span></div></div>'
+      +'<div class="q-body"><small>Gempa bumi terbaru</small><b>'+esc(g.Wilayah)+'</b><small>'+esc(g.Tanggal)+', '+esc(g.Jam)+'. Kedalaman '+esc(g.Kedalaman)+'.</small><small>'+esc(g.Potensi||'')+(g.Dirasakan?' Dirasakan: '+esc(g.Dirasakan):'')+'</small></div>'
+      +(felt.length?'<div class="q-more"><details><summary>Gempa yang baru dirasakan</summary>'+felt.map(f=>'<div class="q-item"><b>M'+esc(f.Magnitude)+'</b> '+esc(f.Wilayah)+'<br><small style="color:var(--ink2)">'+esc(f.Tanggal)+', '+esc(f.Jam)+'. '+esc(f.Dirasakan||'')+'</small></div>').join('')+'<div class="q-item"><small style="color:var(--ink2)">Sumber: BMKG</small></div></details></div>':'<div class="q-more"><small style="color:var(--ink2)">Sumber: BMKG</small></div>')
+      +'</div>';
+  }catch{
+    box.innerHTML='';
+  }
+}
+async function loadHomeNews(){
+  const box=$('#homeNews');
+  box.innerHTML=skelRows(3);
+  try{
+    const d=await getNews(st.region,'terbaru');
+    if(!d.items.length)throw 0;
+    box.innerHTML=d.items.slice(0,5).map(rowHTML).join('');
+  }catch{
+    box.innerHTML='<div class="empty"><b>Berita belum bisa dimuat</b>Periksa koneksi internet Anda.<br><button class="btn sm" data-act="home-reload">Coba lagi</button></div>';
+  }
+}
+function renderResume(){
+  const wrap=$('#resumeWrap'),box=$('#resume');
+  const l=st.last,parts=[];
+  if(l.tv)parts.push('<button class="rrow" data-act="resume-tv"><span class="rlogo" style="background:'+hue(l.tv.name)+';color:#fff;font-family:var(--display);font-weight:800">'+esc(ini(l.tv.name))+'</span><span class="rt"><b>'+esc(l.tv.name)+'</b><small>Terakhir ditonton di TV</small></span><span class="pbtn" style="background:var(--red)">'+ic('play')+'</span></button>');
+  if(l.radio)parts.push('<button class="rrow" data-act="resume-radio"><span class="rlogo" style="background:'+hue(l.radio.name)+';color:#fff;font-family:var(--display);font-weight:800">'+esc(ini(l.radio.name))+'</span><span class="rt"><b>'+esc(l.radio.name)+'</b><small>Terakhir didengar di radio</small></span><span class="pbtn">'+ic('play')+'</span></button>');
+  wrap.hidden=!parts.length;box.innerHTML=parts.join('');
+}
+function loadHome(){
+  $('#helloTitle').textContent=greet();
+  $('#helloDate').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+(prov()?'. Menampilkan '+prov().n+'.':'');
+  renderResume();
+  loadWeather();loadQuake();loadHomeNews();
+}
+
+/* ---------- jenis sumber ---------- */
+function ytEmbed(u){
+  let m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|live\/|embed\/)|youtu\.be\/)([\w-]{11})/);
+  if(m)return 'https://www.youtube.com/embed/'+m[1]+'?autoplay=1&playsinline=1';
+  m=u.match(/youtube\.com\/channel\/(UC[\w-]{22})/);
+  if(m)return 'https://www.youtube.com/embed/live_stream?channel='+m[1]+'&autoplay=1&playsinline=1';
+  return '';
+}
+function kindOf(u){
+  if(/youtube\.com|youtu\.be/i.test(u))return ytEmbed(u)?'yt':'page';
+  if(/\.m3u8(\?|#|$)/i.test(u))return 'hls';
+  if(/\.(mp3|aac|ogg|m4a|opus)(\?|#|$)/i.test(u))return 'audio';
+  if(/\.(jpe?g|png|gif|webp)(\?|#|$)/i.test(u))return 'image';
+  if(/\.(mp4|webm)(\?|#|$)/i.test(u))return 'video';
+  return 'page';
+}
+
+/* ---------- TV ---------- */
+const tv={list:null,err:false,loading:false,cat:'semua',q:'',cur:null,limit:60};
+const badSet=()=>new Set(sess.get('bad',[]));
+function markBad(id){const s=badSet();s.add(id);sess.set('bad',[...s])}
+function parseM3U(t){
+  const out=[],seen=new Set();let cur=null;
+  for(const raw of t.split(/\r?\n/)){
+    const l=raw.trim();if(!l)continue;
+    if(l.startsWith('#EXTINF')){
+      const at=k=>{const m=l.match(new RegExp(k+'="([^"]*)"'));return m?m[1]:''};
+      let name=l.split(',').slice(1).join(',').trim();
+      const geo=/geo-?blocked/i.test(name);
+      name=name.replace(/\s*\[[^\]]*\]\s*/g,' ').replace(/\s*\(\d{3,4}p\)\s*/g,' ').replace(/\s+/g,' ').trim()||at('tvg-name');
+      cur={name,logo:at('tvg-logo'),group:(at('group-title')||'Lainnya').split(';')[0].trim()||'Lainnya',geo};
+    }else if(l[0]!=='#'&&cur){
+      cur.url=l;cur.id='t'+hash(l);
+      if(!seen.has(cur.id)&&/^https?:/i.test(l)){seen.add(cur.id);out.push(cur)}
+      cur=null;
+    }
+  }
+  return out;
+}
+async function loadTV(){
+  renderTV();
+  if(tv.list||tv.loading)return;
+  tv.loading=true;tv.err=false;renderTV();
+  try{
+    const t=await fetchText('https://iptv-org.github.io/iptv/countries/id.m3u');
+    tv.list=parseM3U(t);
+    if(!tv.list.length)throw 0;
+  }catch{tv.err=true}
+  tv.loading=false;renderTV();
+}
+function tvItems(){
+  const bad=badSet();
+  let a=[...st.custom.tv.map(c=>Object.assign({},c,{custom:true})),...(tv.list||[])].filter(c=>!mixed(c.url));
+  if(tv.cat==='favorit')a=a.filter(c=>st.fav.tv.includes(c.id));
+  else if(tv.cat==='daerah')a=a.filter(c=>matchRegion(c.name));
+  else if(tv.cat==='kustom')a=a.filter(c=>c.custom);
+  else if(tv.cat!=='semua')a=a.filter(c=>c.group===tv.cat);
+  const q=tv.q.trim().toLowerCase();
+  if(q)a=a.filter(c=>c.name.toLowerCase().includes(q));
+  const sc=c=>(bad.has(c.id)?100:0)+(c.geo?50:0)+(c.custom?-30:0)+(matchRegion(c.name)?-20:0)+(st.fav.tv.includes(c.id)?-10:0);
+  return a.map((c,i)=>[c,sc(c),i]).sort((x,y)=>x[1]-y[1]||x[2]-y[2]).map(x=>x[0]);
+}
+function tileHTML(c,type,onId){
+  const bad=badSet().has(c.id),fav=st.fav.tv.includes(c.id);
+  return '<div style="position:relative"><button class="tile'+(onId===c.id?' on':'')+(bad?' bad':'')+'" data-act="tv-play" data-id="'+esc(c.id)+'" style="width:100%">'
+    +'<div class="logo">'+(c.logo?'<img src="'+esc(c.logo)+'" alt="" loading="lazy" referrerpolicy="no-referrer" data-n="'+esc(c.name)+'" onerror="__fb(this)">':'<span class="ini" style="background:'+hue(c.name)+'">'+esc(ini(c.name))+'</span>')+'</div>'
+    +'<b>'+esc(c.name)+'</b><small>'+(c.custom?'Kanal Anda':bad?'Tidak aktif':c.geo?'Mungkin dibatasi wilayah':esc(c.group))+'</small></button>'
+    +'<button class="fav'+(fav?' is':'')+'" data-act="tv-fav" data-id="'+esc(c.id)+'" aria-label="Favorit" style="top:14px;right:14px">'+ic('star')+'</button>'
+    +(c.custom?'<button class="fav" data-act="custom-del" data-type="tv" data-id="'+esc(c.id)+'" aria-label="Hapus kanal" style="top:50px;right:14px">'+ic('trash')+'</button>':'')+'</div>';
+}
+function renderTV(){
+  // chip
+  const chips=[['semua','Semua'],['favorit','Favorit']];
+  if(prov())chips.push(['daerah','Daerah ini']);
+  if(st.custom.tv.length)chips.push(['kustom','Kanal saya']);
+  if(tv.list){
+    const cnt={};tv.list.forEach(c=>cnt[c.group]=(cnt[c.group]||0)+1);
+    Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,6).forEach(([g])=>chips.push([g,g]));
+  }
+  $('#tvChips').innerHTML=chips.map(c=>'<button class="chip" data-act="tv-cat" data-id="'+esc(c[0])+'" aria-pressed="'+(tv.cat===c[0])+'">'+esc(c[1])+'</button>').join('')
+    +'<button class="chip" data-act="add-open" data-type="tv" style="display:flex;gap:6px;align-items:center">'+ic('plus','width:16px;height:16px')+'Tambah kanal</button>';
+  const g=$('#tvGrid'),note=$('#tvNote'),more=$('#tvMore');
+  if(tv.loading){g.innerHTML=Array.from({length:8},()=>'<div class="skel" style="height:118px"></div>').join('');note.textContent='Memuat daftar kanal…';more.innerHTML='';return}
+  if(tv.err&&!st.custom.tv.length){note.textContent='';more.innerHTML='';
+    g.innerHTML='<div class="empty" style="grid-column:1/-1"><b>Daftar kanal belum bisa dimuat</b>Periksa koneksi, lalu coba lagi. Anda juga bisa menambah kanal sendiri.<br><button class="btn sm" data-act="tv-retry">Coba lagi</button></div>';return}
+  const items=tvItems();
+  const hiddenHttp=[...(tv.list||[])].filter(c=>mixed(c.url)).length;
+  note.textContent=(items.length?items.length+' kanal. ':'')+'Ketersediaan siaran bisa berubah; kanal yang gagal diputar akan ditandai dan dipindah ke bawah.'+(hiddenHttp?' '+hiddenHttp+' kanal beralamat http disembunyikan karena tidak bisa diputar di halaman https.':'');
+  if(!items.length){g.innerHTML='<div class="empty" style="grid-column:1/-1"><b>Tidak ada kanal</b>'+(tv.cat==='favorit'?'Tekan bintang pada kanal untuk menyimpannya di sini.':tv.cat==='daerah'?'Belum ada kanal TV yang cocok dengan wilayah ini di daftar. Anda bisa menambah kanal sendiri.':'Coba kata kunci lain.')+'</div>';more.innerHTML='';return}
+  const cur=tv.cur?tv.cur.id:null;
+  g.innerHTML=items.slice(0,tv.limit).map(c=>tileHTML(c,'tv',cur)).join('');
+  more.innerHTML=items.length>tv.limit?'<button class="btn alt" data-act="tv-more">Tampilkan lebih banyak</button>':'';
+}
+let tvHls=null,tvTimer=null;
+function tvReset(){
+  clearTimeout(tvTimer);
+  if(tvHls){try{tvHls.destroy()}catch{}tvHls=null}
+  const v=$('#tvVideo');v.onplaying=null;v.onerror=null;
+  try{v.pause()}catch{}
+  v.removeAttribute('src');try{v.load()}catch{}
+  const f=$('#tvFrame');f.src='about:blank';f.hidden=true;v.hidden=false;
+}
+function tvStatus(msg,k){
+  const n=$('#tvNoSig');n.hidden=(k==='ok');n.dataset.k=k||'';$('#tvMsg').textContent=msg;
+}
+function updateTvBar(){
+  const c=tv.cur;
+  $('#tvFav').hidden=!c;$('#tvOpen').hidden=!c;
+  if(!c)return;
+  $('#tvName').textContent=c.name;
+  $('#tvMeta').textContent=c.custom?'Kanal Anda':c.group||'Siaran langsung';
+  $('#tvOpen').href=c.url;
+  $('#tvFav').classList.toggle('is',st.fav.tv.includes(c.id));
+}
+function playTV(c){
+  stopRadio(true);
+  tvReset();
+  tv.cur=c;st.last.tv={id:c.id,name:c.name,url:c.url,logo:c.logo||'',group:c.group||'',custom:!!c.custom};store.set('last',st.last);
+  updateTvBar();
+  $$('#tvGrid .tile').forEach(t=>t.classList.toggle('on',t.dataset.id===c.id));
+  if(window.matchMedia('(max-width:899px)').matches)$('#tvStage').scrollIntoView({block:'start',behavior:'smooth'});
+  const kind=kindOf(c.url);
+  if(kind==='yt'){
+    $('#tvVideo').hidden=true;const f=$('#tvFrame');f.hidden=false;f.src=ytEmbed(c.url);tvStatus('','ok');return;
+  }
+  if(kind==='page'||kind==='image'){
+    tvStatus('Alamat ini berupa halaman web. Pakai tombol Buka untuk menontonnya.','fail');return;
+  }
+  const v=$('#tvVideo');
+  tvStatus('Menghubungkan ke '+c.name,'load');
+  const fail=()=>{
+    clearTimeout(tvTimer);markBad(c.id);
+    tvStatus('Sinyal '+c.name+' sedang tidak tersedia. Coba kanal lain.','fail');
+    $$('#tvGrid .tile').forEach(t=>{if(t.dataset.id===c.id)t.classList.add('bad')});
+  };
+  v.onplaying=()=>{clearTimeout(tvTimer);tvStatus('','ok')};
+  v.onerror=fail;
+  tvTimer=setTimeout(fail,16000);
+  if(kind==='hls'&&window.Hls&&Hls.isSupported()){
+    tvHls=new Hls({enableWorker:true,maxBufferLength:20});
+    tvHls.on(Hls.Events.ERROR,(e,d)=>{if(d&&d.fatal)fail()});
+    tvHls.loadSource(c.url);tvHls.attachMedia(v);
+  }else{
+    v.src=c.url;
+  }
+  const pr=v.play();if(pr&&pr.catch)pr.catch(()=>{});
+}
+function stopTV(){tvReset();tvStatus('Pilih kanal di bawah untuk mulai menonton.','')}
+
+/* ---------- Radio ---------- */
+const radio={list:null,err:false,loading:false,cat:'semua',q:'',cur:null,limit:80,hidden:0};
+const RB=['https://de1.api.radio-browser.info','https://nl1.api.radio-browser.info','https://at1.api.radio-browser.info'];
+async function rbFetch(path){
+  for(const b of RB){
+    try{const r=await fetchTimeout(b+path,{},9000);if(r.ok)return await r.json()}catch{}
+  }
+  throw new Error('rb');
+}
+async function loadRadio(){
+  renderRadio();
+  if(radio.list||radio.loading)return;
+  radio.loading=true;radio.err=false;renderRadio();
+  try{
+    const j=await rbFetch('/json/stations/search?countrycode=ID&hidebroken=true&order=clickcount&reverse=true&limit=700');
+    const seen=new Set();let hidden=0;
+    radio.list=j.filter(s=>s.lastcheckok===1&&(s.url_resolved||s.url)&&(s.name||'').trim()).map(s=>({
+      id:s.stationuuid,name:s.name.trim(),url:s.url_resolved||s.url,logo:s.favicon||'',state:(s.state||'').trim(),
+      tags:(s.tags||'').toLowerCase(),codec:s.codec||'',br:s.bitrate||0,hls:!!s.hls
+    })).filter(s=>{
+      if(mixed(s.url)){hidden++;return false}
+      const k=s.name.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;
+    });
+    radio.hidden=hidden;
+    if(!radio.list.length)throw 0;
+  }catch{radio.err=true}
+  radio.loading=false;renderRadio();
+}
+const RCATS=[
+  ['berita','Berita',s=>/news|berita|talk|info/.test(s.tags+' '+s.name.toLowerCase())],
+  ['pop','Pop',s=>/pop|top 40|hits/.test(s.tags)],
+  ['dangdut','Dangdut',s=>/dangdut/.test(s.tags+' '+s.name.toLowerCase())],
+  ['religi','Religi',s=>/islam|quran|religi|dakwah|kristen|gospel|christian|rohani/.test(s.tags+' '+s.name.toLowerCase())],
+  ['rri','RRI',s=>/^rri\b/i.test(s.name)]
+];
+function radioItems(){
+  let a=[...st.custom.radio.map(c=>Object.assign({tags:'',state:'',br:0,custom:true},c)),...(radio.list||[])];
+  if(radio.cat==='favorit')a=a.filter(s=>st.fav.radio.includes(s.id));
+  else if(radio.cat==='daerah')a=a.filter(s=>matchRegion(s.state+' '+s.name));
+  else if(radio.cat==='kustom')a=a.filter(s=>s.custom);
+  else if(radio.cat!=='semua'){const r=RCATS.find(x=>x[0]===radio.cat);if(r)a=a.filter(r[2])}
+  const q=radio.q.trim().toLowerCase();
+  if(q)a=a.filter(s=>(s.name+' '+s.state+' '+s.tags).toLowerCase().includes(q));
+  if(prov()&&radio.cat==='semua')a=a.map((s,i)=>[s,matchRegion(s.state+' '+s.name)?0:1,i]).sort((x,y)=>x[1]-y[1]||x[2]-y[2]).map(x=>x[0]);
+  return a;
+}
+function rowRadioHTML(s){
+  const on=radio.cur&&radio.cur.id===s.id,fav=st.fav.radio.includes(s.id);
+  const logo=s.logo?'<img src="'+esc(s.logo)+'" alt="" loading="lazy" referrerpolicy="no-referrer" data-n="'+esc(s.name)+'" onerror="__fb(this)">':'<span class="ini" style="background:'+hue(s.name)+'">'+esc(ini(s.name))+'</span>';
+  const sub=[s.custom?'Stasiun Anda':s.state,s.br?s.br+' kbps':''].filter(Boolean).join(', ')||'Indonesia';
+  return '<div class="rrow'+(on?' on':'')+'"><div class="rlogo">'+logo+'</div><div class="rt"><b>'+esc(s.name)+'</b><small>'+esc(sub)+'</small></div>'
+    +'<div class="rr-act"><button class="favb'+(fav?' is':'')+'" data-act="radio-fav" data-id="'+esc(s.id)+'" aria-label="Favorit">'+ic('star')+'</button>'
+    +(s.custom?'<button class="favb" data-act="custom-del" data-type="radio" data-id="'+esc(s.id)+'" aria-label="Hapus">'+ic('trash')+'</button>':'')
+    +'<button class="pbtn" data-act="radio-play" data-id="'+esc(s.id)+'" aria-label="Putar '+esc(s.name)+'">'+ic(on&&!$('#aud').paused?'pause':'play')+'</button></div></div>';
+}
+function renderRadio(){
+  const chips=[['semua','Semua'],['favorit','Favorit']];
+  if(prov())chips.push(['daerah','Daerah ini']);
+  RCATS.forEach(r=>chips.push([r[0],r[1]]));
+  if(st.custom.radio.length)chips.push(['kustom','Stasiun saya']);
+  $('#rdChips').innerHTML=chips.map(c=>'<button class="chip" data-act="rd-cat" data-id="'+c[0]+'" aria-pressed="'+(radio.cat===c[0])+'">'+esc(c[1])+'</button>').join('')
+    +'<button class="chip" data-act="add-open" data-type="radio" style="display:flex;gap:6px;align-items:center">'+ic('plus','width:16px;height:16px')+'Tambah stasiun</button>';
+  const l=$('#rdList'),note=$('#rdNote'),more=$('#rdMore');
+  if(radio.loading){l.innerHTML=skelRows(6);note.textContent='Memuat daftar stasiun…';more.innerHTML='';return}
+  if(radio.err&&!st.custom.radio.length){l.innerHTML='<div class="empty"><b>Daftar radio belum bisa dimuat</b>Periksa koneksi, lalu coba lagi.<br><button class="btn sm" data-act="rd-retry">Coba lagi</button></div>';note.textContent='';more.innerHTML='';return}
+  const items=radioItems();
+  note.textContent=(items.length?items.length+' stasiun, hanya yang lolos pemeriksaan terakhir. ':'')+(radio.hidden?radio.hidden+' stasiun beralamat http disembunyikan karena tidak bisa diputar di halaman https.':'');
+  if(!items.length){l.innerHTML='<div class="empty"><b>Tidak ada stasiun</b>'+(radio.cat==='favorit'?'Tekan bintang pada stasiun untuk menyimpannya di sini.':radio.cat==='daerah'?'Belum ada stasiun yang cocok dengan wilayah ini. Coba kata kunci kota di kolom cari.':'Coba kata kunci lain.')+'</div>';more.innerHTML='';return}
+  l.innerHTML=items.slice(0,radio.limit).map(rowRadioHTML).join('');
+  more.innerHTML=items.length>radio.limit?'<button class="btn alt" data-act="rd-more">Tampilkan lebih banyak</button>':'';
+}
+const aud=$('#aud');
+let radHls=null;
+function setMini(s,state,playing){
+  const m=$('#mini');m.hidden=!s;
+  if(!s)return;
+  $('#miniName').textContent=s.name;
+  $('#miniState').innerHTML=(playing?'<span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>':'')+esc(state);
+  $('#miniLogo').innerHTML=s.logo?'<img src="'+esc(s.logo)+'" alt="" referrerpolicy="no-referrer" onerror="this.remove()">':'<span class="ini" style="background:'+hue(s.name)+'">'+esc(ini(s.name))+'</span>';
+  $('#miniUse').setAttribute('href',playing||state==='Menghubungkan…'?'#i-pause':'#i-play');
+}
+function radReset(){
+  if(radHls){try{radHls.destroy()}catch{}radHls=null}
+  try{aud.pause()}catch{}
+  aud.removeAttribute('src');try{aud.load()}catch{}
+}
+function playRadio(s){
+  stopTV();
+  radReset();
+  radio.cur=s;radio.failed=false;
+  st.last.radio={id:s.id,name:s.name,url:s.url,logo:s.logo||'',hls:!!s.hls,custom:!!s.custom};store.set('last',st.last);
+  setMini(s,'Menghubungkan…',false);
+  const hls=s.hls||/\.m3u8(\?|#|$)/i.test(s.url);
+  if(hls&&window.Hls&&Hls.isSupported()){
+    radHls=new Hls();
+    radHls.on(Hls.Events.ERROR,(e,d)=>{if(d&&d.fatal)radFail(s)});
+    radHls.loadSource(s.url);radHls.attachMedia(aud);
+  }else{
+    aud.src=s.url;
+  }
+  const pr=aud.play();if(pr&&pr.catch)pr.catch(()=>radFail(s));
+  if(!s.custom){rbFetch('/json/url/'+encodeURIComponent(s.id)).catch(()=>{})}
+  if('mediaSession' in navigator){
+    try{
+      navigator.mediaSession.metadata=new MediaMetadata({title:s.name,artist:'Mantam Info',artwork:s.logo&&!mixed(s.logo)?[{src:s.logo}]:[]});
+      navigator.mediaSession.setActionHandler('play',()=>aud.play());
+      navigator.mediaSession.setActionHandler('pause',()=>aud.pause());
+      navigator.mediaSession.setActionHandler('stop',()=>stopRadio());
+    }catch{}
+  }
+  renderRadioRows();
+}
+function radFail(s){
+  if(!radio.cur||radio.cur.id!==s.id)return;
+  radio.failed=true;
+  setMini(s,'Siaran tidak bisa diputar',false);
+  toast(s.name+' sedang tidak bisa diputar. Coba stasiun lain.');
+  renderRadioRows();
+}
+function stopRadio(silent){
+  radReset();radio.cur=null;setMini(null);
+  if(!silent)renderRadioRows();
+}
+function renderRadioRows(){if(curTab==='radio')renderRadio()}
+aud.addEventListener('playing',()=>{if(radio.cur){setMini(radio.cur,'Siaran langsung',true);renderRadioRows()}});
+aud.addEventListener('pause',()=>{if(!aud.paused)return;if(radio.cur&&aud.currentSrc&&!radio.failed){setMini(radio.cur,'Dijeda',false);renderRadioRows()}});
+aud.addEventListener('waiting',()=>{if(radio.cur)setMini(radio.cur,'Menghubungkan…',false)});
+aud.addEventListener('error',()=>{if(radio.cur&&(aud.getAttribute('src')))radFail(radio.cur)});
+
+/* ---------- CCTV ---------- */
+const CAMS=[
+  {id:'ntmc',n:'NTMC Polri (Korlantas)',op:'Korlantas Polri',area:'nasional',type:'nasional',url:'https://k3i.korlantas.polri.go.id/cctv_streaming',d:'Pusat pengendali lalu lintas nasional dengan ribuan kamera jalan.'},
+  {id:'rttmc',n:'RTTMC Kemenhub',op:'Kementerian Perhubungan',area:'nasional',type:'nasional',url:'http://rttmc.dephub.go.id/rttmc/livecctv',d:'Pantauan lalu lintas dari Kementerian Perhubungan. Alamatnya http, jadi dibuka di tab baru.'},
+  {id:'bm-nontol',n:'Jalan nasional non-tol',op:'Bina Marga, Kementerian PU',area:'nasional',type:'nasional',url:'https://binamarga.pu.go.id/cctv-non-tol/',d:'Kamera di jalan nasional di luar tol.'},
+  {id:'bm-tol',n:'Daftar CCTV ruas tol',op:'Bina Marga, Kementerian PU',area:'tol',type:'tol',url:'https://binamarga.pu.go.id/contents/cctv_tol',d:'Jumlah kamera aktif per ruas tol: Jakarta–Cikampek, Trans-Jawa, Trans-Sumatera, Makassar, dan lainnya.'},
+  {id:'mudik-tol',n:'CCTV tol (portal mudik)',op:'Kementerian PU',area:'tol',type:'tol',url:'https://mudik.pu.go.id/cctv-tol',d:'Portal kamera tol yang paling lengkap saat musim mudik.'},
+  {id:'bpjt',n:'CCTV tol BPJT',op:'BPJT, Kementerian PU',area:'tol',type:'tol',url:'https://bpjt.pu.go.id/cctv/cctv_inframe',d:'Pilih ruas tol, lalu lihat kondisi lalu lintas.'},
+  {id:'lewatmana',n:'Lewatmana',op:'Swasta',area:'jakarta',type:'nasional',url:'https://lewatmana.com/cam/',d:'Kumpulan kamera di Jakarta, Depok, Bandung, Surabaya, dan Puncak.',prov:['jakarta','jabar','jatim']},
+  {id:'jkt',n:'Jakarta Smart City',op:'Pemprov DKI Jakarta',area:'jakarta',type:'kota',url:'https://smartcity.jakarta.go.id',d:'Portal data kota Jakarta, termasuk pantauan kamera lalu lintas.',prov:['jakarta']},
+  {id:'pelindung',n:'Pelindung Kota Bandung',op:'Pemkot Bandung',area:'jabar',type:'kota',url:'https://pelindung.bandung.go.id/',d:'Pemantauan lalu lintas Kota Bandung dengan ratusan titik kamera.',prov:['jabar']},
+  {id:'atcs-bdg',n:'ATCS Dishub Kota Bandung',op:'Dishub Kota Bandung',area:'jabar',type:'kota',url:'https://atcs-dishub.bandung.go.id/',d:'Kamera simpang dari Area Traffic Control System.',prov:['jabar']},
+  {id:'bdg-kab',n:'CCTV Kabupaten Bandung',op:'Dishub Kab. Bandung',area:'jabar',type:'kota',url:'https://dishub.bandungkab.go.id/cctv/',d:'Kamera lalu lintas di wilayah Kabupaten Bandung.',prov:['jabar']},
+  {id:'bdg-barat',n:'ATCS Kabupaten Bandung Barat',op:'Pemkab Bandung Barat',area:'jabar',type:'kota',url:'https://atcs.bandungbaratkab.go.id/',d:'Kamera ATCS Bandung Barat.',prov:['jabar']},
+  {id:'bogor',n:'Bogor Smart Way',op:'Pemkot Bogor',area:'jabar',type:'kota',url:'https://bsw.kotabogor.go.id/cctv',d:'Kamera lalu lintas Kota Bogor.',prov:['jabar']},
+  {id:'cirebon',n:'ATCS Kota Cirebon',op:'Dishub Kota Cirebon',area:'jabar',type:'kota',url:'https://dishub.cirebonkota.go.id/atcs/',d:'Pilih ruas jalan yang ingin dipantau.',prov:['jabar']},
+  {id:'jogja',n:'CCTV Kota Yogyakarta',op:'Pemkot Yogyakarta',area:'jateng',type:'kota',url:'https://cctv.jogjakota.go.id/',d:'Kamera di titik-titik utama Kota Yogyakarta.',prov:['diy']},
+  {id:'gresik',n:'CCTV Kanjeng Gresik',op:'Pemkab Gresik',area:'jatim',type:'kota',url:'https://cctvkanjeng.gresikkab.go.id/',d:'Kamera pemantau Kabupaten Gresik.',prov:['jatim']},
+  {id:'padang',n:'ATCS Kota Padang',op:'Dishub Kota Padang',area:'sumatera',type:'kota',url:'https://atcs.dishub.padang.go.id/',d:'Pilih ruas jalan yang ingin dipantau.',prov:['sumbar']}
+];
+const CAREA=[['semua','Semua'],['nasional','Nasional'],['tol','Tol'],['jakarta','Jakarta'],['jabar','Jawa Barat'],['jateng','Yogyakarta'],['jatim','Jawa Timur'],['sumatera','Sumatera']];
+const cm={cat:'semua'};
+function camHTML(c){
+  const fav=st.fav.cctv.includes(c.id);
+  const cls=c.custom?'cust':c.type==='tol'?'tol':c.type==='kota'?'kota':'';
+  const kindTxt=c.custom?{hls:'Siaran langsung',yt:'YouTube',image:'Gambar',video:'Video',page:'Halaman web',audio:'Halaman web'}[c.kind]||'':'';
+  return '<article class="cam '+cls+'"><div class="cam-top"><div><h3>'+esc(c.n)+'</h3><span class="tag">'+esc(c.custom?'Kamera Anda'+(kindTxt?', '+kindTxt:''):c.op)+'</span></div>'
+    +'<div class="rr-act"><button class="favb'+(fav?' is':'')+'" data-act="cctv-fav" data-id="'+esc(c.id)+'" aria-label="Favorit">'+ic('star')+'</button>'
+    +(c.custom?'<button class="favb" data-act="custom-del" data-type="cctv" data-id="'+esc(c.id)+'" aria-label="Hapus">'+ic('trash')+'</button>':'')+'</div></div>'
+    +(c.d?'<p>'+esc(c.d)+'</p>':'')
+    +'<div class="cam-act"><a class="btn sm" href="'+esc(c.url)+'" target="_blank" rel="noopener">Buka kamera'+ic('ext','width:16px;height:16px')+'</a>'
+    +'<button class="btn alt sm" data-act="cctv-view" data-id="'+esc(c.id)+'">Lihat di sini</button></div></article>';
+}
+function allCams(){
+  return [...st.custom.cctv.map(c=>Object.assign({},c,{custom:true,n:c.name,area:'kustom',type:'kustom'})),...CAMS];
+}
+function renderCCTV(){
+  const chips=[...CAREA];
+  chips.splice(1,0,['favorit','Favorit']);
+  if(st.custom.cctv.length)chips.push(['kustom','Kamera saya']);
+  $('#cmChips').innerHTML=chips.map(c=>'<button class="chip" data-act="cm-cat" data-id="'+c[0]+'" aria-pressed="'+(cm.cat===c[0])+'">'+esc(c[1])+'</button>').join('')
+    +'<button class="chip" data-act="add-open" data-type="cctv" style="display:flex;gap:6px;align-items:center">'+ic('plus','width:16px;height:16px')+'Tambah kamera</button>';
+  let a=allCams();
+  if(cm.cat==='favorit')a=a.filter(c=>st.fav.cctv.includes(c.id));
+  else if(cm.cat==='kustom')a=a.filter(c=>c.custom);
+  else if(cm.cat!=='semua')a=a.filter(c=>c.area===cm.cat);
+  const p=prov();
+  if(p)a=a.map((c,i)=>[c,(c.prov&&c.prov.includes(p.id))?0:c.custom?0:1,i]).sort((x,y)=>x[1]-y[1]||x[2]-y[2]).map(x=>x[0]);
+  const l=$('#cmList');
+  if(!a.length){l.innerHTML='<div class="empty"><b>Belum ada kamera</b>'+(cm.cat==='favorit'?'Tekan bintang pada kamera untuk menyimpannya di sini.':'Tambahkan kamera sendiri dengan alamat siaran (.m3u8), YouTube, atau gambar.')+'</div>';return}
+  let html='';
+  if(p&&cm.cat==='semua'){
+    const near=a.filter(c=>c.custom||(c.prov&&c.prov.includes(p.id)));
+    if(near.length){html+='<p class="note" style="margin:0">Kamera di '+esc(p.n)+'</p>'+near.map(camHTML).join('');
+      const rest=a.filter(c=>!near.includes(c));
+      if(rest.length)html+='<p class="note" style="margin:10px 0 0">Kamera lainnya</p>'+rest.map(camHTML).join('');
+      l.innerHTML=html;return}
+    html='<p class="note" style="margin:0">Belum ada portal CCTV resmi untuk '+esc(p.n)+' di daftar ini. Portal nasional di bawah tetap mencakup jalan dan tol di sana.</p>';
+  }
+  l.innerHTML=html+a.map(camHTML).join('');
+}
+/* penampil kamera */
+let viewHls=null,viewTimer=null;
+function viewClose(){
+  if(viewHls){try{viewHls.destroy()}catch{}viewHls=null}
+  clearInterval(viewTimer);viewTimer=null;
+  $('#viewBody').innerHTML='';
+  const d=$('#viewDlg');if(d.open)d.close();
+}
+function openViewer(c){
+  const body=$('#viewBody'),hint=$('#viewHint');
+  $('#viewTitle').textContent=c.n||c.name;
+  $('#viewOpen').href=c.url;
+  const kind=c.custom?(c.kind||'page'):'page';
+  hint.textContent='';
+  if(mixed(c.url)){
+    body.innerHTML='';
+    hint.textContent='Alamat ini memakai http, jadi tidak bisa ditampilkan di halaman https. Buka di tab baru.';
+  }else if(kind==='hls'||kind==='video'){
+    body.innerHTML='<video controls autoplay muted playsinline></video>';
+    const v=body.firstChild;
+    if(kind==='hls'&&window.Hls&&Hls.isSupported()){
+      viewHls=new Hls();viewHls.on(Hls.Events.ERROR,(e,d)=>{if(d&&d.fatal)hint.textContent='Siaran kamera ini tidak bisa dimuat. Pastikan alamatnya benar dan mengizinkan akses dari situs lain.'});
+      viewHls.loadSource(c.url);viewHls.attachMedia(v);
+    }else v.src=c.url;
+  }else if(kind==='yt'&&ytEmbed(c.url)){
+    body.innerHTML='<iframe allow="autoplay; encrypted-media; fullscreen" allowfullscreen referrerpolicy="no-referrer" title="Kamera"></iframe>';
+    body.firstChild.src=ytEmbed(c.url);
+  }else if(kind==='image'){
+    body.innerHTML='<img alt="Gambar kamera">';
+    const im=body.firstChild;const load=()=>{im.src=c.url+(c.url.includes('?')?'&':'?')+'_='+Date.now()};
+    load();viewTimer=setInterval(load,10000);
+    hint.textContent='Gambar diperbarui otomatis tiap 10 detik.';
+  }else{
+    body.innerHTML='<iframe loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" title="Kamera"></iframe>';
+    body.firstChild.src=c.url;
+    hint.textContent='Jika layar kosong, portal ini melarang ditampilkan di aplikasi lain. Pakai tombol di bawah untuk membukanya langsung.';
+  }
+  $('#viewDlg').showModal();
+}
+
+/* ---------- wilayah ---------- */
+function renderRegions(q){
+  q=(q||'').trim().toLowerCase();
+  const list=PROVS.filter(p=>!q||(p.n+' '+p.cap).toLowerCase().includes(q));
+  $('#regList').innerHTML=(!q||'seluruh indonesia'.includes(q)?'<button class="pitem" data-act="region-pick" data-id="all" aria-current="'+(st.region==='all')+'"><span><b>Seluruh Indonesia</b></span></button>':'')
+    +list.map(p=>'<button class="pitem" data-act="region-pick" data-id="'+p.id+'" aria-current="'+(st.region===p.id)+'"><span><b>'+esc(p.n)+'</b></span><small>'+esc(p.cap)+'</small></button>').join('');
+}
+function setRegion(id){
+  st.region=P[id]?id:'all';store.set('region',st.region);
+  $('#regionName').textContent=regionLabel();
+  $('#regionDlg').close();
+  tv.cat='semua';radio.cat='semua';tv.limit=60;radio.limit=80;
+  if(curTab==='tv')renderTV();
+  if(curTab==='radio')renderRadio();
+  if(curTab==='cctv')renderCCTV();
+  if(curTab==='berita')loadNewsView();
+  if(curTab==='home')loadHome();
+}
+
+/* ---------- tambah sumber ---------- */
+let addType='tv';
+function openAdd(t){
+  addType=t;
+  $('#addTitle').textContent=t==='tv'?'Tambah kanal TV':t==='radio'?'Tambah stasiun radio':'Tambah kamera CCTV';
+  $('#addHint').textContent=t==='tv'?'Tempel alamat siaran (.m3u8), tautan YouTube, atau video. Hanya simpan sumber yang memang boleh Anda akses.'
+    :t==='radio'?'Tempel alamat siaran streaming radio (mp3, aac, atau .m3u8).'
+    :'Tempel alamat siaran (.m3u8), tautan YouTube, gambar yang diperbarui berkala, atau halaman web kamera publik. Jangan menambahkan kamera pribadi orang lain.';
+  $('#addForm').reset();
+  $('#addDlg').showModal();
+}
+$('#addForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=$('#addName').value.trim(),url=safeUrl($('#addUrl').value.trim());
+  if(!name||!url){toast('Alamat tidak valid. Gunakan http:// atau https://');return}
+  if(mixed(url)){toast('Alamat http tidak bisa diputar di halaman https. Cari versi https-nya.');return}
+  let kind=kindOf(url);
+  if(addType==='radio'&&kind!=='hls')kind='audio';
+  const item={id:'c'+hash(url+name),name,url,kind};
+  if(addType!=='cctv')item.group='Kanal saya';
+  st.custom[addType]=st.custom[addType].filter(x=>x.id!==item.id);
+  st.custom[addType].unshift(item);
+  saveCustom();
+  $('#addDlg').close();
+  toast('Tersimpan di perangkat ini.');
+  if(addType==='tv'){tv.cat='kustom';renderTV()}
+  if(addType==='radio'){radio.cat='kustom';renderRadio()}
+  if(addType==='cctv'){cm.cat='kustom';renderCCTV()}
+});
+
+/* ---------- event ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,id=b.dataset.id;
+  switch(a){
+    case 'tab':show(b.dataset.tab);break;
+    case 'region-open':renderRegions('');$('#regQ').value='';$('#regionDlg').showModal();break;
+    case 'region-pick':setRegion(id);break;
+    case 'close-dlg':b.closest('dialog').close();break;
+    case 'close-view':viewClose();break;
+    case 'theme':{const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';st.theme=t;store.set('theme',t);applyTheme(t);break}
+    case 'news-cat':news.cat=id;loadNewsView();break;
+    case 'news-refresh':loadNewsView(true);break;
+    case 'home-reload':loadHomeNews();break;
+    case 'tv-cat':tv.cat=id;tv.limit=60;renderTV();break;
+    case 'tv-more':tv.limit+=60;renderTV();break;
+    case 'tv-retry':tv.list=null;loadTV();break;
+    case 'tv-play':{const c=[...st.custom.tv.map(x=>Object.assign({},x,{custom:true})),...(tv.list||[])].find(x=>x.id===id);if(c)playTV(c);break}
+    case 'tv-fav':e.stopPropagation();toggleFav('tv',id);renderTV();updateTvBar();break;
+    case 'tv-fav-cur':if(tv.cur){toggleFav('tv',tv.cur.id);updateTvBar();renderTV()}break;
+    case 'rd-cat':radio.cat=id;radio.limit=80;renderRadio();break;
+    case 'rd-more':radio.limit+=80;renderRadio();break;
+    case 'rd-retry':radio.list=null;loadRadio();break;
+    case 'radio-play':{
+      const s=[...st.custom.radio.map(x=>Object.assign({tags:'',state:'',br:0,custom:true},x)),...(radio.list||[])].find(x=>x.id===id);
+      if(!s)break;
+      if(radio.cur&&radio.cur.id===s.id&&!radio.failed&&!aud.paused){aud.pause()}
+      else if(radio.cur&&radio.cur.id===s.id&&!radio.failed&&aud.paused&&aud.currentSrc){aud.play().catch(()=>radFail(s))}
+      else playRadio(s);
+      break}
+    case 'radio-fav':toggleFav('radio',id);renderRadio();break;
+    case 'mini-toggle':if(radio.cur){if(aud.paused){if(!radio.failed&&(aud.currentSrc||radHls))aud.play().catch(()=>radFail(radio.cur));else playRadio(radio.cur)}else aud.pause()}break;
+    case 'mini-stop':stopRadio();break;
+    case 'cm-cat':cm.cat=id;renderCCTV();break;
+    case 'cctv-fav':toggleFav('cctv',id);renderCCTV();break;
+    case 'cctv-view':{const c=allCams().find(x=>x.id===id);if(c)openViewer(c);break}
+    case 'add-open':openAdd(b.dataset.type);break;
+    case 'custom-del':{
+      const t=b.dataset.type;
+      st.custom[t]=st.custom[t].filter(x=>x.id!==id);saveCustom();
+      st.fav[t==='tv'?'tv':t]=st.fav[t].filter(x=>x!==id);saveFav();
+      if(t==='radio')renderRadio();else if(t==='cctv')renderCCTV();else renderTV();
+      toast('Dihapus.');break}
+    case 'resume-tv':{show('tv');const l=st.last.tv;if(l)playTV(l);break}
+    case 'resume-radio':{const l=st.last.radio;show('radio');if(l)playRadio(l);break}
+  }
+});
+$('#newsQ').addEventListener('input',e=>{news.q=e.target.value;renderNewsList()});
+$('#tvQ').addEventListener('input',e=>{tv.q=e.target.value;tv.limit=60;renderTV()});
+$('#rdQ').addEventListener('input',e=>{radio.q=e.target.value;radio.limit=80;renderRadio()});
+$('#regQ').addEventListener('input',e=>renderRegions(e.target.value));
+$$('dialog').forEach(d=>{
+  d.addEventListener('click',e=>{if(e.target===d){if(d.id==='viewDlg')viewClose();else d.close()}});
+});
+$('#viewDlg').addEventListener('close',()=>{
+  if(viewHls){try{viewHls.destroy()}catch{}viewHls=null}
+  clearInterval(viewTimer);$('#viewBody').innerHTML='';
+});
+
+/* ---------- mulai ---------- */
+$('#regionName').textContent=regionLabel();
+show((location.hash||'#home').slice(1),false);
+})();
+</script>
+</body>
+</html>
