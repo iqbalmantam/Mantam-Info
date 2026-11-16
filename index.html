@@ -605,6 +605,7 @@ const NAT=[
   {name:'SINDOnews',url:'https://www.sindonews.com/feed'},
   {name:'Berita terbaru',url:gnews('berita Indonesia when:1d'),gn:true}
 ];
+const SIBER_RE=/siber|cyber|peretas|hacker|\bhack|kebocoran data|data pribadi|bocor|phishing|ransomware|malware|penipuan online|penipuan digital|\bscam|BSSN|judi online|pinjol|deepfake|spyware|serangan digital|\bPDN\b/i;
 const CATS=[
   {id:'terbaru',n:'Terbaru'},
   {id:'politik',n:'Politik',ant:'politik',q:'politik pemerintah'},
@@ -625,7 +626,11 @@ function feedsFor(regionId,catId){
     const f=[{name:'Berita '+c.n,url:gnews(c.q+' Indonesia when:3d'),gn:true}];
     if(c.ant)f.unshift({name:'ANTARA',url:'https://www.antaranews.com/rss/'+c.ant+'.xml'});
     if(c.id==='ekonomi')f.push({name:'CNBC Indonesia',url:'https://www.cnbcindonesia.com/news/rss'},{name:'Bisnis.com',url:'https://www.bisnis.com/rss'});
-    if(c.id==='siber')f.push({name:'Peretasan',url:gnews('peretasan hacker Indonesia when:7d'),gn:true},{name:'Penipuan online',url:gnews('penipuan online Indonesia when:7d'),gn:true},{name:'BSSN',url:gnews('BSSN siber when:14d'),gn:true});
+    if(c.id==='siber'){
+      f.push({name:'Peretasan',url:gnews('peretasan hacker Indonesia when:7d'),gn:true},{name:'Penipuan online',url:gnews('penipuan online Indonesia when:7d'),gn:true});
+      NAT.filter(x=>!x.gn).forEach(x=>f.push({...x,kw:SIBER_RE}));
+      f.push({name:'ANTARA',url:'https://www.antaranews.com/rss/tekno.xml',kw:SIBER_RE});
+    }
     if(c.id==='dunia')f.push({name:'BBC Indonesia',url:'https://feeds.bbci.co.uk/indonesia/rss.xml'});
     return f;
   }
@@ -680,7 +685,8 @@ async function getFeed(f){
   const c=feedCache.get(f.url);
   if(c&&Date.now()-c.t<300000)return c.v;
   try{
-    const xml=await fetchText(f.url);
+    let xml;
+    try{xml=await fetchText(f.url)}catch(e){if(!f.gn)throw e;await new Promise(r=>setTimeout(r,1500));xml=await fetchText(f.url)}
     const v=parseRSS(xml,f.name,!!f.gn);
     if(!v.length)throw new Error('kosong');
     feedMark(f.url,true);
@@ -716,11 +722,11 @@ async function getNews(regionId,catId,force,onPart){
       if(seen.has(k))return;seen.add(k);items.push(x);
     }));
     items.sort((a,b)=>(b.date?b.date.getTime():0)-(a.date?a.date.getTime():0));
-    return {items:items.slice(0,90),failed,total:feeds.length};
+    return {items:items.slice(0,90),failed,total:feeds.filter(f=>!f.kw).length};
   };
   await Promise.allSettled(feeds.map(f=>{
     if(force)feedCache.delete(f.url);
-    return getFeed(f).then(v=>{lists.push(v);if(onPart)onPart(build())},()=>{failed++});
+    return getFeed(f).then(v=>{lists.push(f.kw?v.filter(x=>f.kw.test(x.title+' '+x.desc)):v);if(onPart)onPart(build())},()=>{if(!f.kw)failed++});
   }));
   const v=build();
   if(v.items.length){newsCache.set(key,{t:Date.now(),v});saveStale(key,v.items)}
