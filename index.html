@@ -614,7 +614,7 @@ const CATS=[
   {id:'tekno',n:'Teknologi',ant:'tekno',q:'teknologi'},
   {id:'hiburan',n:'Hiburan',ant:'hiburan',q:'hiburan selebriti'},
   {id:'kesehatan',n:'Kesehatan',q:'kesehatan'},
-  {id:'siber',n:'Siber',q:'(kebocoran data OR peretasan OR keamanan siber OR penipuan online OR BSSN)'},
+  {id:'siber',n:'Siber',q:'keamanan siber kebocoran data'},
   {id:'dunia',n:'Dunia',ant:'dunia',q:'berita dunia internasional'}
 ];
 function feedsFor(regionId,catId){
@@ -625,7 +625,7 @@ function feedsFor(regionId,catId){
     const f=[{name:'Berita '+c.n,url:gnews(c.q+' Indonesia when:3d'),gn:true}];
     if(c.ant)f.unshift({name:'ANTARA',url:'https://www.antaranews.com/rss/'+c.ant+'.xml'});
     if(c.id==='ekonomi')f.push({name:'CNBC Indonesia',url:'https://www.cnbcindonesia.com/news/rss'},{name:'Bisnis.com',url:'https://www.bisnis.com/rss'});
-    if(c.id==='siber')f.push({name:'Siber: BSSN & peretasan',url:gnews('BSSN OR peretasan OR ransomware Indonesia when:7d'),gn:true},{name:'Siber: penipuan online',url:gnews('penipuan online OR phishing OR scam Indonesia when:7d'),gn:true});
+    if(c.id==='siber')f.push({name:'Peretasan',url:gnews('peretasan hacker Indonesia when:7d'),gn:true},{name:'Penipuan online',url:gnews('penipuan online Indonesia when:7d'),gn:true},{name:'BSSN',url:gnews('BSSN siber when:14d'),gn:true});
     if(c.id==='dunia')f.push({name:'BBC Indonesia',url:'https://feeds.bbci.co.uk/indonesia/rss.xml'});
     return f;
   }
@@ -758,9 +758,10 @@ function renderSrcChips(all){
 }
 function renderNewsList(){
   const box=$('#newsBox');
-  if(news.loading){box.innerHTML='<div class="skel" style="aspect-ratio:16/9;border-radius:20px"></div>'+skelRows(5);return}
+  if(news.loading){$('#newsSrc').hidden=true;box.innerHTML='<div class="skel" style="aspect-ratio:16/9;border-radius:20px"></div>'+skelRows(5);return}
   const d=news.data;
   if(!d||!d.items.length){
+    $('#newsSrc').hidden=true;
     box.innerHTML='<div class="empty"><b>Berita belum bisa dimuat</b>Sumber berita tidak terjangkau saat ini. Periksa koneksi, lalu coba lagi.<br><button class="btn sm" data-act="news-refresh">Coba lagi</button></div>';
     return;
   }
