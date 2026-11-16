@@ -83,6 +83,8 @@ main{max-width:1120px;margin:auto;padding:14px 16px 190px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:12px;font-weight:600;font-size:15px;background:var(--ink);color:var(--paper)}
 .btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
 .btn.sm{padding:8px 12px;font-size:14px}
+.newpill{position:sticky;top:66px;z-index:12;display:block;margin:0 auto 10px;padding:9px 18px;border-radius:999px;background:var(--ink);color:var(--paper);font-weight:700;font-size:14px;box-shadow:0 6px 18px -6px rgba(0,0,0,.45)}
+.newpill[hidden]{display:none}
 .note{font-size:14px;color:var(--ink2);margin:4px 0 12px}
 .empty{padding:28px 16px;text-align:center;color:var(--ink2);border:1px dashed var(--line);border-radius:16px}
 .empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
@@ -309,6 +311,7 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
       <div class="sect-h" style="margin-top:6px"><h2 id="newsTitle">Berita</h2><button class="link" data-act="news-refresh" style="display:flex;gap:6px;align-items:center"><svg class="ic" style="width:16px;height:16px"><use href="#i-refresh"/></svg>Muat ulang</button></div>
       <div class="chips" id="newsCats" role="group" aria-label="Kategori berita"></div>
       <label class="search"><svg class="ic"><use href="#i-search"/></svg><span class="sr">Cari berita</span><input id="newsQ" type="search" placeholder="Cari judul berita" autocomplete="off"></label>
+      <button class="newpill" id="newsNew" data-act="news-show" hidden></button>
       <div id="newsBox"></div>
     </section>
 
@@ -528,6 +531,30 @@ function applyTheme(t){
 }
 applyTheme(st.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
 
+/* ---------- pembaruan otomatis ---------- */
+let lastPoll=Date.now(),polling=false;
+async function pollNews(){
+  if(polling||document.hidden||!navigator.onLine)return;
+  polling=true;lastPoll=Date.now();
+  try{
+    if(curTab==='berita'&&!news.loading&&news.data){
+      const d=await getNews(st.region,news.cat,true);
+      if(curTab!=='berita'||!d.items.length)return;
+      const have=new Set(news.data.items.map(x=>x.link));
+      const n=d.items.filter(x=>!have.has(x.link)).length;
+      if(n){
+        news.pending=d;
+        const b=$('#newsNew');b.textContent='↑ '+n+' berita baru, ketuk untuk melihat';b.hidden=false;
+      }
+    }else if(curTab==='home'&&window.scrollY<80){
+      const d=await getNews(st.region,'terbaru',true);
+      if(curTab==='home'&&d.items.length)$('#homeNews').innerHTML=d.items.slice(0,5).map(rowHTML).join('');
+    }
+  }catch{}finally{polling=false}
+}
+setInterval(pollNews,180000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastPoll>180000)pollNews()});
+
 /* ---------- navigasi ---------- */
 const TABS=['home','berita','tv','radio'];
 let curTab='home';
@@ -643,7 +670,7 @@ async function getNews(regionId,catId,force){
 }
 
 /* ---------- Berita (tampilan) ---------- */
-const news={cat:'terbaru',q:'',data:null,loading:false};
+const news={cat:'terbaru',q:'',data:null,loading:false,pending:null};
 function leadHTML(x){
   const t=esc(x.title);
   return '<a class="lead'+(x.img?'':' noimg')+'" href="'+esc(x.link)+'" target="_blank" rel="noopener"'+(x.img?'':' style="background:'+hue(x.src)+'"')+'>'
@@ -679,6 +706,7 @@ function renderNewsList(){
 }
 async function loadNewsView(force){
   renderNewsCats();
+  news.pending=null;$('#newsNew').hidden=true;
   news.loading=true;renderNewsList();
   try{news.data=await getNews(st.region,news.cat,force)}catch{news.data=null}
   news.loading=false;renderNewsList();
@@ -1164,6 +1192,7 @@ document.addEventListener('click',e=>{
     case 'theme':{const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';st.theme=t;store.set('theme',t);applyTheme(t);break}
     case 'news-cat':news.cat=id;loadNewsView();break;
     case 'news-refresh':loadNewsView(true);break;
+    case 'news-show':if(news.pending){news.data=news.pending;news.pending=null;$('#newsNew').hidden=true;renderNewsList();window.scrollTo({top:0,behavior:'smooth'})}break;
     case 'home-reload':loadHomeNews();break;
     case 'tv-cat':tv.cat=id;tv.limit=60;renderTV();break;
     case 'tv-more':tv.limit+=60;renderTV();break;
