@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Mantam Info — berita, TV, radio, dan CCTV Indonesia</title>
-<meta name="description" content="Satu aplikasi untuk berita, TV, radio, dan CCTV dari seluruh Indonesia, ditambah cuaca dan gempa dari BMKG.">
+<title>Mantam Info — berita, TV, dan radio Indonesia</title>
+<meta name="description" content="Satu aplikasi untuk berita, TV, dan radio dari seluruh Indonesia, ditambah cuaca dan gempa dari BMKG.">
 <meta name="theme-color" content="#EEF1F4" id="metaTheme">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 70'%3E%3Crect width='10' height='70' fill='%23fff'/%3E%3Crect x='10' width='10' height='70' fill='%23F2B100'/%3E%3Crect x='20' width='10' height='70' fill='%2319B6C4'/%3E%3Crect x='30' width='10' height='70' fill='%231FA24A'/%3E%3Crect x='40' width='10' height='70' fill='%23D6389A'/%3E%3Crect x='50' width='10' height='70' fill='%23D8232A'/%3E%3Crect x='60' width='10' height='70' fill='%231F5FBF'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,7 +48,7 @@ h1,h2,h3{font-family:var(--display);line-height:1.15;letter-spacing:-.01em}
 .round{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line)}
 .strip{height:4px;background:var(--bars)}
 main{max-width:1120px;margin:auto;padding:14px 16px 190px}
-.tabs{position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs{position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 .tab{display:grid;justify-items:center;gap:2px;padding:9px 0 8px;font-size:12px;font-weight:600;color:var(--ink2);position:relative}
 .tab[aria-current="page"]{color:var(--ink)}
 .tab[aria-current="page"]::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--red)}
@@ -103,12 +103,12 @@ main{max-width:1120px;margin:auto;padding:14px 16px 190px}
 .q-more summary{cursor:pointer;font-weight:600;color:var(--blue)}
 .q-item{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
 .q-item:last-child{border:0}
-.launch{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.launch{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .lt{display:grid;gap:6px;justify-items:start;padding:14px;border-radius:16px;background:var(--card);border:1px solid var(--line);text-align:left}
 .lt b{font-family:var(--display);font-size:17px}
 .lt small{color:var(--ink2);font-size:13px;line-height:1.3}
 .lt .ic{width:26px;height:26px}
-.lt.tvc .ic{color:var(--red)}.lt.rdc .ic{color:var(--green)}.lt.cmc .ic{color:var(--blue)}
+.lt.tvc .ic{color:var(--red)}.lt.rdc .ic{color:var(--green)}
 .resume{display:grid;gap:10px}
 .foot{margin-top:28px;font-size:12.5px;color:var(--ink2);line-height:1.5}
 .foot a{color:var(--blue);font-weight:600}
@@ -187,17 +187,6 @@ main{max-width:1120px;margin:auto;padding:14px 16px 190px}
 .eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}
 @keyframes eq{0%,100%{height:3px}50%{height:10px}}
 
-/* CCTV */
-.cams{display:grid;gap:10px}
-.cam{display:grid;gap:8px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:6px 16px 16px 6px;padding:14px}
-.cam.tol{border-left-color:var(--amber)}
-.cam.kota{border-left-color:var(--green)}
-.cam.cust{border-left-color:var(--red)}
-.cam h3{font-size:18px}
-.cam p{font-size:14px;color:var(--ink2)}
-.cam-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
-.cam-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
-
 /* dialog */
 dialog{border:0;border-radius:20px;padding:0;background:var(--card);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
 dialog::backdrop{background:rgba(5,12,22,.6)}
@@ -211,8 +200,6 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
 .field{display:grid;gap:5px}
 .field label{font-weight:600;font-size:14px}
 .field input,.field select{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:11px 12px;font:inherit}
-.vbody{position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
-.vbody video,.vbody iframe,.vbody img{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:#000}
 .toast{position:fixed;z-index:80;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + env(safe-area-inset-bottom) + 84px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:calc(100vw - 32px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
 
 @media (min-width:700px){
@@ -284,7 +271,6 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
       <div class="launch">
         <button class="lt tvc" data-act="tab" data-tab="tv"><svg class="ic"><use href="#i-tv"/></svg><b>TV</b><small>Siaran langsung nasional dan daerah</small></button>
         <button class="lt rdc" data-act="tab" data-tab="radio"><svg class="ic"><use href="#i-radio"/></svg><b>Radio</b><small>Stasiun dari seluruh Indonesia</small></button>
-        <button class="lt cmc" data-act="tab" data-tab="cctv"><svg class="ic"><use href="#i-cam"/></svg><b>CCTV</b><small>Pantau jalan dan tol</small></button>
       </div>
       <div id="resumeWrap" hidden>
         <div class="sect-h"><h2>Lanjutkan</h2></div>
@@ -337,12 +323,6 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
       <div style="text-align:center;margin-top:14px" id="rdMore"></div>
     </section>
 
-    <!-- CCTV -->
-    <section id="view-cctv" data-view="cctv" hidden>
-      <p class="note" style="margin-top:0">Kamera milik pemerintah dan operator jalan. Hampir semua portal melarang ditampilkan di aplikasi lain, jadi tombol utama membuka portalnya di tab baru.</p>
-      <div class="chips" id="cmChips" role="group" aria-label="Filter CCTV"></div>
-      <div class="cams" id="cmList"></div>
-    </section>
   </main>
 
   <div class="mini" id="mini" hidden>
@@ -357,7 +337,6 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
     <button class="tab" data-act="tab" data-tab="berita"><svg class="ic"><use href="#i-news"/></svg>Berita</button>
     <button class="tab" data-act="tab" data-tab="tv"><svg class="ic"><use href="#i-tv"/></svg>TV</button>
     <button class="tab" data-act="tab" data-tab="radio"><svg class="ic"><use href="#i-radio"/></svg>Radio</button>
-    <button class="tab" data-act="tab" data-tab="cctv"><svg class="ic"><use href="#i-cam"/></svg>CCTV</button>
   </nav>
 </div>
 
@@ -377,12 +356,6 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
   <button class="btn" type="submit">Simpan</button>
 </form></dialog>
 
-<dialog id="viewDlg"><div class="sheet">
-  <div class="sh-h"><h2 id="viewTitle" style="font-size:19px">Kamera</h2><button class="round" data-act="close-view" aria-label="Tutup"><svg class="ic"><use href="#i-x"/></svg></button></div>
-  <div class="vbody" id="viewBody"></div>
-  <p class="note" id="viewHint"></p>
-  <a class="btn" id="viewOpen" target="_blank" rel="noopener">Buka di tab baru<svg class="ic" style="width:18px;height:18px"><use href="#i-ext"/></svg></a>
-</div></dialog>
 
 <div class="toast" id="toast" hidden role="status"></div>
 <noscript><p style="padding:24px">Mantam Info membutuhkan JavaScript untuk berjalan.</p></noscript>
@@ -531,7 +504,7 @@ function applyTheme(t){
 applyTheme(st.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
 
 /* ---------- navigasi ---------- */
-const TABS=['home','berita','tv','radio','cctv'];
+const TABS=['home','berita','tv','radio'];
 let curTab='home';
 function show(tab,push){
   if(!TABS.includes(tab))tab='home';
@@ -544,7 +517,6 @@ function show(tab,push){
   if(tab==='berita')loadNewsView();
   if(tab==='tv')loadTV();
   if(tab==='radio')loadRadio();
-  if(tab==='cctv')renderCCTV();
 }
 window.addEventListener('popstate',()=>show((location.hash||'#home').slice(1),false));
 window.addEventListener('online',()=>$('#offline').hidden=true);
@@ -810,6 +782,51 @@ function parseM3U(t){
   }
   return out;
 }
+/* pemeriksaan otomatis: hanya kanal yang manifest-nya benar-benar terbaca yang ditampilkan */
+const probe={ok:new Set(),bad:new Set(),running:false,done:0,total:0,loaded:false};
+let probeT=0;
+function loadProbeCache(){
+  probe.loaded=true;
+  const c=store.get('probe',null);
+  if(c&&c.ok&&Date.now()-c.t<43200000){probeT=c.t;c.ok.forEach(i=>probe.ok.add(i));c.bad.forEach(i=>probe.bad.add(i))}
+  else probeT=Date.now();
+}
+function saveProbe(){store.set('probe',{t:probeT||Date.now(),ok:[...probe.ok],bad:[...probe.bad]})}
+async function probeOne(c){
+  if(kindOf(c.url)!=='hls')return false;
+  try{
+    const r=await fetchTimeout(c.url,{},7000);
+    if(!r.ok)return false;
+    const t=(await r.text()).trim();
+    if(!t.startsWith('#EXTM3U'))return false;
+    if(t.includes('#EXTINF'))return true;
+    const line=t.split(/\r?\n/).find((l,i,a)=>l&&l[0]!=='#'&&a[i-1]&&a[i-1].startsWith('#EXT-X-STREAM-INF'));
+    if(!line)return false;
+    const r2=await fetchTimeout(new URL(line,c.url).href,{},7000);
+    if(!r2.ok)return false;
+    const t2=await r2.text();
+    return t2.includes('#EXTINF');
+  }catch{return false}
+}
+async function runProbe(){
+  if(!probe.loaded)loadProbeCache();
+  if(probe.running||!tv.list)return;
+  const todo=tv.list.filter(c=>!probe.ok.has(c.id)&&!probe.bad.has(c.id)&&!mixed(c.url));
+  probe.total=tv.list.filter(c=>!mixed(c.url)).length;probe.done=probe.total-todo.length;
+  if(!todo.length){renderTV();return}
+  probe.running=true;renderTV();
+  let i=0;
+  const worker=async()=>{
+    while(i<todo.length){
+      const c=todo[i++];
+      const ok=await probeOne(c);
+      (ok?probe.ok:probe.bad).add(c.id);probe.done++;
+      if(probe.done%8===0&&curTab==='tv')renderTV();
+    }
+  };
+  await Promise.all(Array.from({length:8},worker));
+  probe.running=false;saveProbe();renderTV();
+}
 async function loadTV(){
   renderTV();
   if(tv.list||tv.loading)return;
@@ -820,10 +837,12 @@ async function loadTV(){
     if(!tv.list.length)throw 0;
   }catch{tv.err=true}
   tv.loading=false;renderTV();
+  if(tv.list)runProbe();
 }
 function tvItems(){
   const bad=badSet();
-  let a=[...st.custom.tv.map(c=>Object.assign({},c,{custom:true})),...(tv.list||[])].filter(c=>!mixed(c.url));
+  const okList=(tv.list||[]).filter(c=>probe.ok.has(c.id)&&!bad.has(c.id));
+  let a=[...st.custom.tv.map(c=>Object.assign({},c,{custom:true})),...okList].filter(c=>!mixed(c.url));
   if(tv.cat==='favorit')a=a.filter(c=>st.fav.tv.includes(c.id));
   else if(tv.cat==='daerah')a=a.filter(c=>matchRegion(c.name));
   else if(tv.cat==='kustom')a=a.filter(c=>c.custom);
@@ -847,19 +866,22 @@ function renderTV(){
   if(prov())chips.push(['daerah','Daerah ini']);
   if(st.custom.tv.length)chips.push(['kustom','Kanal saya']);
   if(tv.list){
-    const cnt={};tv.list.forEach(c=>cnt[c.group]=(cnt[c.group]||0)+1);
+    const cnt={};tv.list.filter(c=>probe.ok.has(c.id)).forEach(c=>cnt[c.group]=(cnt[c.group]||0)+1);
     Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,6).forEach(([g])=>chips.push([g,g]));
   }
   $('#tvChips').innerHTML=chips.map(c=>'<button class="chip" data-act="tv-cat" data-id="'+esc(c[0])+'" aria-pressed="'+(tv.cat===c[0])+'">'+esc(c[1])+'</button>').join('')
-    +'<button class="chip" data-act="add-open" data-type="tv" style="display:flex;gap:6px;align-items:center">'+ic('plus','width:16px;height:16px')+'Tambah kanal</button>';
+    +'<button class="chip" data-act="add-open" data-type="tv" style="display:flex;gap:6px;align-items:center">'+ic('plus','width:16px;height:16px')+'Tambah kanal</button><button class="chip" data-act="tv-recheck">Periksa ulang</button>';
   const g=$('#tvGrid'),note=$('#tvNote'),more=$('#tvMore');
   if(tv.loading){g.innerHTML=Array.from({length:8},()=>'<div class="skel" style="height:118px"></div>').join('');note.textContent='Memuat daftar kanal…';more.innerHTML='';return}
   if(tv.err&&!st.custom.tv.length){note.textContent='';more.innerHTML='';
     g.innerHTML='<div class="empty" style="grid-column:1/-1"><b>Daftar kanal belum bisa dimuat</b>Periksa koneksi, lalu coba lagi. Anda juga bisa menambah kanal sendiri.<br><button class="btn sm" data-act="tv-retry">Coba lagi</button></div>';return}
   const items=tvItems();
-  const hiddenHttp=[...(tv.list||[])].filter(c=>mixed(c.url)).length;
-  note.textContent=(items.length?items.length+' kanal. ':'')+'Ketersediaan siaran bisa berubah; kanal yang gagal diputar akan ditandai dan dipindah ke bawah.'+(hiddenHttp?' '+hiddenHttp+' kanal beralamat http disembunyikan karena tidak bisa diputar di halaman https.':'');
-  if(!items.length){g.innerHTML='<div class="empty" style="grid-column:1/-1"><b>Tidak ada kanal</b>'+(tv.cat==='favorit'?'Tekan bintang pada kanal untuk menyimpannya di sini.':tv.cat==='daerah'?'Belum ada kanal TV yang cocok dengan wilayah ini di daftar. Anda bisa menambah kanal sendiri.':'Coba kata kunci lain.')+'</div>';more.innerHTML='';return}
+  const hiddenHttp=(tv.list||[]).filter(c=>mixed(c.url)).length;
+  if(probe.running)note.textContent='Memeriksa kanal yang aktif… '+probe.done+' dari '+probe.total+'. Kanal yang tidak berfungsi tidak ditampilkan.';
+  else note.textContent=items.length+' kanal aktif, sudah diperiksa otomatis. Kanal yang tidak berfungsi dihapus dari daftar.'+(hiddenHttp?' '+hiddenHttp+' kanal beralamat http disembunyikan karena tidak bisa diputar di halaman https.':'');
+  if(!items.length){
+    if(probe.running){g.innerHTML=Array.from({length:8},()=>'<div class="skel" style="height:118px"></div>').join('');more.innerHTML='';return}
+    g.innerHTML='<div class="empty" style="grid-column:1/-1"><b>Tidak ada kanal</b>'+(tv.cat==='favorit'?'Tekan bintang pada kanal untuk menyimpannya di sini.':tv.cat==='daerah'?'Belum ada kanal TV aktif yang cocok dengan wilayah ini. Anda bisa menambah kanal sendiri.':'Tidak ada kanal aktif yang cocok. Coba kata kunci lain atau tekan Periksa ulang.')+'</div>';more.innerHTML='';return}
   const cur=tv.cur?tv.cur.id:null;
   g.innerHTML=items.slice(0,tv.limit).map(c=>tileHTML(c,'tv',cur)).join('');
   more.innerHTML=items.length>tv.limit?'<button class="btn alt" data-act="tv-more">Tampilkan lebih banyak</button>':'';
@@ -902,9 +924,9 @@ function playTV(c){
   const v=$('#tvVideo');
   tvStatus('Menghubungkan ke '+c.name,'load');
   const fail=()=>{
-    clearTimeout(tvTimer);markBad(c.id);
+    clearTimeout(tvTimer);markBad(c.id);probe.ok.delete(c.id);probe.bad.add(c.id);saveProbe();
     tvStatus('Sinyal '+c.name+' sedang tidak tersedia. Coba kanal lain.','fail');
-    $$('#tvGrid .tile').forEach(t=>{if(t.dataset.id===c.id)t.classList.add('bad')});
+    renderTV();
   };
   v.onplaying=()=>{clearTimeout(tvTimer);tvStatus('','ok')};
   v.onerror=fail;
@@ -1049,107 +1071,6 @@ aud.addEventListener('pause',()=>{if(!aud.paused)return;if(radio.cur&&aud.curren
 aud.addEventListener('waiting',()=>{if(radio.cur)setMini(radio.cur,'Menghubungkan…',false)});
 aud.addEventListener('error',()=>{if(radio.cur&&(aud.getAttribute('src')))radFail(radio.cur)});
 
-/* ---------- CCTV ---------- */
-const CAMS=[
-  {id:'ntmc',n:'NTMC Polri (Korlantas)',op:'Korlantas Polri',area:'nasional',type:'nasional',url:'https://k3i.korlantas.polri.go.id/cctv_streaming',d:'Pusat pengendali lalu lintas nasional dengan ribuan kamera jalan.'},
-  {id:'rttmc',n:'RTTMC Kemenhub',op:'Kementerian Perhubungan',area:'nasional',type:'nasional',url:'http://rttmc.dephub.go.id/rttmc/livecctv',d:'Pantauan lalu lintas dari Kementerian Perhubungan. Alamatnya http, jadi dibuka di tab baru.'},
-  {id:'bm-nontol',n:'Jalan nasional non-tol',op:'Bina Marga, Kementerian PU',area:'nasional',type:'nasional',url:'https://binamarga.pu.go.id/cctv-non-tol/',d:'Kamera di jalan nasional di luar tol.'},
-  {id:'bm-tol',n:'Daftar CCTV ruas tol',op:'Bina Marga, Kementerian PU',area:'tol',type:'tol',url:'https://binamarga.pu.go.id/contents/cctv_tol',d:'Jumlah kamera aktif per ruas tol: Jakarta–Cikampek, Trans-Jawa, Trans-Sumatera, Makassar, dan lainnya.'},
-  {id:'mudik-tol',n:'CCTV tol (portal mudik)',op:'Kementerian PU',area:'tol',type:'tol',url:'https://mudik.pu.go.id/cctv-tol',d:'Portal kamera tol yang paling lengkap saat musim mudik.'},
-  {id:'bpjt',n:'CCTV tol BPJT',op:'BPJT, Kementerian PU',area:'tol',type:'tol',url:'https://bpjt.pu.go.id/cctv/cctv_inframe',d:'Pilih ruas tol, lalu lihat kondisi lalu lintas.'},
-  {id:'lewatmana',n:'Lewatmana',op:'Swasta',area:'jakarta',type:'nasional',url:'https://lewatmana.com/cam/',d:'Kumpulan kamera di Jakarta, Depok, Bandung, Surabaya, dan Puncak.',prov:['jakarta','jabar','jatim']},
-  {id:'jkt',n:'Jakarta Smart City',op:'Pemprov DKI Jakarta',area:'jakarta',type:'kota',url:'https://smartcity.jakarta.go.id',d:'Portal data kota Jakarta, termasuk pantauan kamera lalu lintas.',prov:['jakarta']},
-  {id:'pelindung',n:'Pelindung Kota Bandung',op:'Pemkot Bandung',area:'jabar',type:'kota',url:'https://pelindung.bandung.go.id/',d:'Pemantauan lalu lintas Kota Bandung dengan ratusan titik kamera.',prov:['jabar']},
-  {id:'atcs-bdg',n:'ATCS Dishub Kota Bandung',op:'Dishub Kota Bandung',area:'jabar',type:'kota',url:'https://atcs-dishub.bandung.go.id/',d:'Kamera simpang dari Area Traffic Control System.',prov:['jabar']},
-  {id:'bdg-kab',n:'CCTV Kabupaten Bandung',op:'Dishub Kab. Bandung',area:'jabar',type:'kota',url:'https://dishub.bandungkab.go.id/cctv/',d:'Kamera lalu lintas di wilayah Kabupaten Bandung.',prov:['jabar']},
-  {id:'bdg-barat',n:'ATCS Kabupaten Bandung Barat',op:'Pemkab Bandung Barat',area:'jabar',type:'kota',url:'https://atcs.bandungbaratkab.go.id/',d:'Kamera ATCS Bandung Barat.',prov:['jabar']},
-  {id:'bogor',n:'Bogor Smart Way',op:'Pemkot Bogor',area:'jabar',type:'kota',url:'https://bsw.kotabogor.go.id/cctv',d:'Kamera lalu lintas Kota Bogor.',prov:['jabar']},
-  {id:'cirebon',n:'ATCS Kota Cirebon',op:'Dishub Kota Cirebon',area:'jabar',type:'kota',url:'https://dishub.cirebonkota.go.id/atcs/',d:'Pilih ruas jalan yang ingin dipantau.',prov:['jabar']},
-  {id:'jogja',n:'CCTV Kota Yogyakarta',op:'Pemkot Yogyakarta',area:'jateng',type:'kota',url:'https://cctv.jogjakota.go.id/',d:'Kamera di titik-titik utama Kota Yogyakarta.',prov:['diy']},
-  {id:'gresik',n:'CCTV Kanjeng Gresik',op:'Pemkab Gresik',area:'jatim',type:'kota',url:'https://cctvkanjeng.gresikkab.go.id/',d:'Kamera pemantau Kabupaten Gresik.',prov:['jatim']},
-  {id:'padang',n:'ATCS Kota Padang',op:'Dishub Kota Padang',area:'sumatera',type:'kota',url:'https://atcs.dishub.padang.go.id/',d:'Pilih ruas jalan yang ingin dipantau.',prov:['sumbar']}
-];
-const CAREA=[['semua','Semua'],['nasional','Nasional'],['tol','Tol'],['jakarta','Jakarta'],['jabar','Jawa Barat'],['jateng','Yogyakarta'],['jatim','Jawa Timur'],['sumatera','Sumatera']];
-const cm={cat:'semua'};
-function camHTML(c){
-  const fav=st.fav.cctv.includes(c.id);
-  const cls=c.custom?'cust':c.type==='tol'?'tol':c.type==='kota'?'kota':'';
-  const kindTxt=c.custom?{hls:'Siaran langsung',yt:'YouTube',image:'Gambar',video:'Video',page:'Halaman web',audio:'Halaman web'}[c.kind]||'':'';
-  return '<article class="cam '+cls+'"><div class="cam-top"><div><h3>'+esc(c.n)+'</h3><span class="tag">'+esc(c.custom?'Kamera Anda'+(kindTxt?', '+kindTxt:''):c.op)+'</span></div>'
-    +'<div class="rr-act"><button class="favb'+(fav?' is':'')+'" data-act="cctv-fav" data-id="'+esc(c.id)+'" aria-label="Favorit">'+ic('star')+'</button>'
-    +(c.custom?'<button class="favb" data-act="custom-del" data-type="cctv" data-id="'+esc(c.id)+'" aria-label="Hapus">'+ic('trash')+'</button>':'')+'</div></div>'
-    +(c.d?'<p>'+esc(c.d)+'</p>':'')
-    +'<div class="cam-act"><a class="btn sm" href="'+esc(c.url)+'" target="_blank" rel="noopener">Buka kamera'+ic('ext','width:16px;height:16px')+'</a>'
-    +'<button class="btn alt sm" data-act="cctv-view" data-id="'+esc(c.id)+'">Lihat di sini</button></div></article>';
-}
-function allCams(){
-  return [...st.custom.cctv.map(c=>Object.assign({},c,{custom:true,n:c.name,area:'kustom',type:'kustom'})),...CAMS];
-}
-function renderCCTV(){
-  const chips=[...CAREA];
-  chips.splice(1,0,['favorit','Favorit']);
-  if(st.custom.cctv.length)chips.push(['kustom','Kamera saya']);
-  $('#cmChips').innerHTML=chips.map(c=>'<button class="chip" data-act="cm-cat" data-id="'+c[0]+'" aria-pressed="'+(cm.cat===c[0])+'">'+esc(c[1])+'</button>').join('')
-    +'<button class="chip" data-act="add-open" data-type="cctv" style="display:flex;gap:6px;align-items:center">'+ic('plus','width:16px;height:16px')+'Tambah kamera</button>';
-  let a=allCams();
-  if(cm.cat==='favorit')a=a.filter(c=>st.fav.cctv.includes(c.id));
-  else if(cm.cat==='kustom')a=a.filter(c=>c.custom);
-  else if(cm.cat!=='semua')a=a.filter(c=>c.area===cm.cat);
-  const p=prov();
-  if(p)a=a.map((c,i)=>[c,(c.prov&&c.prov.includes(p.id))?0:c.custom?0:1,i]).sort((x,y)=>x[1]-y[1]||x[2]-y[2]).map(x=>x[0]);
-  const l=$('#cmList');
-  if(!a.length){l.innerHTML='<div class="empty"><b>Belum ada kamera</b>'+(cm.cat==='favorit'?'Tekan bintang pada kamera untuk menyimpannya di sini.':'Tambahkan kamera sendiri dengan alamat siaran (.m3u8), YouTube, atau gambar.')+'</div>';return}
-  let html='';
-  if(p&&cm.cat==='semua'){
-    const near=a.filter(c=>c.custom||(c.prov&&c.prov.includes(p.id)));
-    if(near.length){html+='<p class="note" style="margin:0">Kamera di '+esc(p.n)+'</p>'+near.map(camHTML).join('');
-      const rest=a.filter(c=>!near.includes(c));
-      if(rest.length)html+='<p class="note" style="margin:10px 0 0">Kamera lainnya</p>'+rest.map(camHTML).join('');
-      l.innerHTML=html;return}
-    html='<p class="note" style="margin:0">Belum ada portal CCTV resmi untuk '+esc(p.n)+' di daftar ini. Portal nasional di bawah tetap mencakup jalan dan tol di sana.</p>';
-  }
-  l.innerHTML=html+a.map(camHTML).join('');
-}
-/* penampil kamera */
-let viewHls=null,viewTimer=null;
-function viewClose(){
-  if(viewHls){try{viewHls.destroy()}catch{}viewHls=null}
-  clearInterval(viewTimer);viewTimer=null;
-  $('#viewBody').innerHTML='';
-  const d=$('#viewDlg');if(d.open)d.close();
-}
-function openViewer(c){
-  const body=$('#viewBody'),hint=$('#viewHint');
-  $('#viewTitle').textContent=c.n||c.name;
-  $('#viewOpen').href=c.url;
-  const kind=c.custom?(c.kind||'page'):'page';
-  hint.textContent='';
-  if(mixed(c.url)){
-    body.innerHTML='';
-    hint.textContent='Alamat ini memakai http, jadi tidak bisa ditampilkan di halaman https. Buka di tab baru.';
-  }else if(kind==='hls'||kind==='video'){
-    body.innerHTML='<video controls autoplay muted playsinline></video>';
-    const v=body.firstChild;
-    if(kind==='hls'&&window.Hls&&Hls.isSupported()){
-      viewHls=new Hls();viewHls.on(Hls.Events.ERROR,(e,d)=>{if(d&&d.fatal)hint.textContent='Siaran kamera ini tidak bisa dimuat. Pastikan alamatnya benar dan mengizinkan akses dari situs lain.'});
-      viewHls.loadSource(c.url);viewHls.attachMedia(v);
-    }else v.src=c.url;
-  }else if(kind==='yt'&&ytEmbed(c.url)){
-    body.innerHTML='<iframe allow="autoplay; encrypted-media; fullscreen" allowfullscreen referrerpolicy="no-referrer" title="Kamera"></iframe>';
-    body.firstChild.src=ytEmbed(c.url);
-  }else if(kind==='image'){
-    body.innerHTML='<img alt="Gambar kamera">';
-    const im=body.firstChild;const load=()=>{im.src=c.url+(c.url.includes('?')?'&':'?')+'_='+Date.now()};
-    load();viewTimer=setInterval(load,10000);
-    hint.textContent='Gambar diperbarui otomatis tiap 10 detik.';
-  }else{
-    body.innerHTML='<iframe loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" title="Kamera"></iframe>';
-    body.firstChild.src=c.url;
-    hint.textContent='Jika layar kosong, portal ini melarang ditampilkan di aplikasi lain. Pakai tombol di bawah untuk membukanya langsung.';
-  }
-  $('#viewDlg').showModal();
-}
-
 /* ---------- wilayah ---------- */
 function renderRegions(q){
   q=(q||'').trim().toLowerCase();
@@ -1164,7 +1085,6 @@ function setRegion(id){
   tv.cat='semua';radio.cat='semua';tv.limit=60;radio.limit=80;
   if(curTab==='tv')renderTV();
   if(curTab==='radio')renderRadio();
-  if(curTab==='cctv')renderCCTV();
   if(curTab==='berita')loadNewsView();
   if(curTab==='home')loadHome();
 }
@@ -1173,10 +1093,9 @@ function setRegion(id){
 let addType='tv';
 function openAdd(t){
   addType=t;
-  $('#addTitle').textContent=t==='tv'?'Tambah kanal TV':t==='radio'?'Tambah stasiun radio':'Tambah kamera CCTV';
+  $('#addTitle').textContent=t==='tv'?'Tambah kanal TV':'Tambah stasiun radio';
   $('#addHint').textContent=t==='tv'?'Tempel alamat siaran (.m3u8), tautan YouTube, atau video. Hanya simpan sumber yang memang boleh Anda akses.'
-    :t==='radio'?'Tempel alamat siaran streaming radio (mp3, aac, atau .m3u8).'
-    :'Tempel alamat siaran (.m3u8), tautan YouTube, gambar yang diperbarui berkala, atau halaman web kamera publik. Jangan menambahkan kamera pribadi orang lain.';
+    :'Tempel alamat siaran streaming radio (mp3, aac, atau .m3u8).';
   $('#addForm').reset();
   $('#addDlg').showModal();
 }
@@ -1188,7 +1107,7 @@ $('#addForm').addEventListener('submit',e=>{
   let kind=kindOf(url);
   if(addType==='radio'&&kind!=='hls')kind='audio';
   const item={id:'c'+hash(url+name),name,url,kind};
-  if(addType!=='cctv')item.group='Kanal saya';
+  item.group='Kanal saya';
   st.custom[addType]=st.custom[addType].filter(x=>x.id!==item.id);
   st.custom[addType].unshift(item);
   saveCustom();
@@ -1196,7 +1115,6 @@ $('#addForm').addEventListener('submit',e=>{
   toast('Tersimpan di perangkat ini.');
   if(addType==='tv'){tv.cat='kustom';renderTV()}
   if(addType==='radio'){radio.cat='kustom';renderRadio()}
-  if(addType==='cctv'){cm.cat='kustom';renderCCTV()}
 });
 
 /* ---------- event ---------- */
@@ -1208,7 +1126,6 @@ document.addEventListener('click',e=>{
     case 'region-open':renderRegions('');$('#regQ').value='';$('#regionDlg').showModal();break;
     case 'region-pick':setRegion(id);break;
     case 'close-dlg':b.closest('dialog').close();break;
-    case 'close-view':viewClose();break;
     case 'theme':{const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';st.theme=t;store.set('theme',t);applyTheme(t);break}
     case 'news-cat':news.cat=id;loadNewsView();break;
     case 'news-refresh':loadNewsView(true);break;
@@ -1216,6 +1133,7 @@ document.addEventListener('click',e=>{
     case 'tv-cat':tv.cat=id;tv.limit=60;renderTV();break;
     case 'tv-more':tv.limit+=60;renderTV();break;
     case 'tv-retry':tv.list=null;loadTV();break;
+    case 'tv-recheck':probe.ok.clear();probe.bad.clear();sess.set('bad',[]);probeT=Date.now();store.set('probe',null);runProbe();break;
     case 'tv-play':{const c=[...st.custom.tv.map(x=>Object.assign({},x,{custom:true})),...(tv.list||[])].find(x=>x.id===id);if(c)playTV(c);break}
     case 'tv-fav':e.stopPropagation();toggleFav('tv',id);renderTV();updateTvBar();break;
     case 'tv-fav-cur':if(tv.cur){toggleFav('tv',tv.cur.id);updateTvBar();renderTV()}break;
@@ -1232,15 +1150,12 @@ document.addEventListener('click',e=>{
     case 'radio-fav':toggleFav('radio',id);renderRadio();break;
     case 'mini-toggle':if(radio.cur){if(aud.paused){if(!radio.failed&&(aud.currentSrc||radHls))aud.play().catch(()=>radFail(radio.cur));else playRadio(radio.cur)}else aud.pause()}break;
     case 'mini-stop':stopRadio();break;
-    case 'cm-cat':cm.cat=id;renderCCTV();break;
-    case 'cctv-fav':toggleFav('cctv',id);renderCCTV();break;
-    case 'cctv-view':{const c=allCams().find(x=>x.id===id);if(c)openViewer(c);break}
     case 'add-open':openAdd(b.dataset.type);break;
     case 'custom-del':{
       const t=b.dataset.type;
       st.custom[t]=st.custom[t].filter(x=>x.id!==id);saveCustom();
       st.fav[t==='tv'?'tv':t]=st.fav[t].filter(x=>x!==id);saveFav();
-      if(t==='radio')renderRadio();else if(t==='cctv')renderCCTV();else renderTV();
+      if(t==='radio')renderRadio();else renderTV();
       toast('Dihapus.');break}
     case 'resume-tv':{show('tv');const l=st.last.tv;if(l)playTV(l);break}
     case 'resume-radio':{const l=st.last.radio;show('radio');if(l)playRadio(l);break}
@@ -1251,11 +1166,7 @@ $('#tvQ').addEventListener('input',e=>{tv.q=e.target.value;tv.limit=60;renderTV(
 $('#rdQ').addEventListener('input',e=>{radio.q=e.target.value;radio.limit=80;renderRadio()});
 $('#regQ').addEventListener('input',e=>renderRegions(e.target.value));
 $$('dialog').forEach(d=>{
-  d.addEventListener('click',e=>{if(e.target===d){if(d.id==='viewDlg')viewClose();else d.close()}});
-});
-$('#viewDlg').addEventListener('close',()=>{
-  if(viewHls){try{viewHls.destroy()}catch{}viewHls=null}
-  clearInterval(viewTimer);$('#viewBody').innerHTML='';
+  d.addEventListener('click',e=>{if(e.target===d){d.close()}});
 });
 
 /* ---------- mulai ---------- */
