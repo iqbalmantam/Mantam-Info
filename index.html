@@ -257,7 +257,7 @@ dialog::backdrop{background:rgba(5,12,22,.6)}
   <header class="top">
     <div class="top-in">
       <div class="brand"><span class="mark" aria-hidden="true"></span>Mantam Info</div>
-      <button class="region" data-act="region-open" aria-label="Pilih wilayah"><svg class="ic"><use href="#i-pin"/></svg><span id="regionName">Seluruh Indonesia</span></button>
+      <button class="region" data-act="region-open" aria-label="Pilih wilayah"><svg class="ic"><use href="#i-pin"/></svg><span id="regionName">Indonesia</span></button>
       <button class="round" data-act="theme" aria-label="Ganti tema"><svg class="ic"><use id="themeUse" href="#i-moon"/></svg></button>
     </div>
     <div class="strip" aria-hidden="true"></div>
@@ -487,7 +487,7 @@ const st={
   last:store.get('last',{})
 };
 const prov=()=>P[st.region]||null;
-const regionLabel=()=>prov()?prov().n:'Seluruh Indonesia';
+const regionLabel=()=>prov()?prov().n:'Indonesia';
 const saveFav=()=>store.set('fav',st.fav);
 const saveCustom=()=>store.set('custom',st.custom);
 function matchRegion(text){
