@@ -1,4 +1,4 @@
-const V='mantam-info-v4';
+const V='mantam-info-v5';
 const SHELL=['./','index.html','manifest.json','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png'];
 const RUNTIME=/^https:\/\/(cdnjs\.cloudflare\.com|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
 self.addEventListener('install',e=>{
