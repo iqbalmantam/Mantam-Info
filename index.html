@@ -108,7 +108,8 @@ main{max-width:1120px;margin:auto;padding:14px 16px 190px}
 .fact{margin-top:22px;padding:16px;border-radius:20px;background:color-mix(in srgb,#e8a800 14%,var(--card));border:1px solid color-mix(in srgb,#e8a800 40%,var(--line))}
 .fact b{display:block;font-family:var(--display);font-size:16px;margin-bottom:6px}
 .fact p{margin:0;font-size:15.5px;line-height:1.5}
-.fact .link{margin-top:10px}
+.fact-act{display:flex;gap:18px;margin-top:10px}
+.fact-act .link{font-weight:700}
 .wx{margin-top:16px;background:var(--wx-bg);color:var(--wx-fg);border-radius:20px;padding:18px}
 .wx-main{display:flex;align-items:center;gap:14px}
 .wx-t{font-family:var(--display);font-size:56px;font-weight:800;line-height:1}
@@ -871,9 +872,10 @@ function shareText(t){
   else if(navigator.clipboard){navigator.clipboard.writeText(full).then(()=>toast('Teks disalin, tinggal ditempel.'),()=>toast('Tidak bisa menyalin.'))}
   else toast('Fitur bagikan tidak tersedia di browser ini.');
 }
-function todayFact(){return FACTS[Math.floor((Date.now()+25200000)/86400000)%FACTS.length]}
+let factOff=0;
+function todayFact(){return FACTS[(Math.floor((Date.now()+25200000)/86400000)+factOff)%FACTS.length]}
 function renderFact(){
-  $('#factBox').innerHTML='<b>Tahukah Anda?</b><p>'+esc(todayFact())+'</p><button class="link" data-act="share-fact">Bagikan</button>';
+  $('#factBox').innerHTML='<b>Tahukah Anda?</b><p>'+esc(todayFact())+'</p><div class="fact-act"><button class="link" data-act="fact-next">Fakta lain</button><button class="link" data-act="share-fact">Bagikan</button></div>';
 }
 function digestLines(){
   const L=[];
@@ -1359,6 +1361,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,id=b.dataset.id;
   switch(a){
+    case 'fact-next':factOff++;renderFact();break;
     case 'share-fact':shareText('Tahukah Anda?\n'+todayFact());break;
     case 'share-digest':shareText('Ringkasan hari ini, '+new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'\n'+digestLines().map(x=>'• '+x.t).join('\n'));break;
     case 'pwa-install':if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.finally(()=>{deferredInstall=null;renderInstall()})}else toast('Di Safari: ketuk tombol Bagikan, lalu pilih Tambah ke Layar Utama.');break;
