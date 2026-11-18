@@ -1364,7 +1364,7 @@ document.addEventListener('click',e=>{
     case 'fact-next':factOff++;renderFact();break;
     case 'share-fact':shareText('Tahukah Anda?\n'+todayFact());break;
     case 'share-digest':shareText('Ringkasan hari ini, '+new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'\n'+digestLines().map(x=>'• '+x.t).join('\n'));break;
-    case 'pwa-install':if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.finally(()=>{deferredInstall=null;renderInstall()})}else toast('Di Safari: ketuk tombol Bagikan, lalu pilih Tambah ke Layar Utama.');break;
+    case 'pwa-install':store.set('pwaTried',Date.now());if(deferredInstall){deferredInstall.prompt();deferredInstall.userChoice.finally(()=>{deferredInstall=null;renderInstall()})}else toast('Di Safari: ketuk tombol Bagikan, lalu pilih Tambah ke Layar Utama.');break;
     case 'tab':show(b.dataset.tab);break;
     case 'region-open':renderRegions('');$('#regQ').value='';$('#regionDlg').showModal();break;
     case 'region-pick':setRegion(id);break;
@@ -1425,7 +1425,8 @@ let deferredInstall=null;
 const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 function renderInstall(){
-  $('#pwaTip').hidden=isStandalone()||!/^https?:$/.test(location.protocol)||!(deferredInstall||isIOS);
+  const tried=Date.now()-(+store.get('pwaTried')||0)<7776000000; // sudah dicoba: jangan tawarkan lagi selama 90 hari
+  $('#pwaTip').hidden=tried||isStandalone()||!/^https?:$/.test(location.protocol)||!(deferredInstall||isIOS);
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;renderInstall()});
 window.addEventListener('appinstalled',()=>{deferredInstall=null;renderInstall();toast('Mantam Info terpasang.')});
